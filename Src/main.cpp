@@ -109,6 +109,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
+    HAL_Delay(500);
+    //status led blinking at 1Hz
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
