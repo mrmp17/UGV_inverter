@@ -103,12 +103,54 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
+  TIM_HandleTypeDef timerUsed = htim2; //specify which timer to use
+  //tim2: ch1
+  //tim1: ch2
+  //tim4: ch4
+  //tim3: ch3
+
+  //start PWM for all three phases for one inverter channel
+  HAL_TIM_PWM_Start(&timerUsed, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&timerUsed, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(&timerUsed, TIM_CHANNEL_3);
+  __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_1, 0);
+  __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_2, 0);
+  __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_3, 0);
+  //set compares to 0 (pwm signal low) just in case
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+    //set phases to FLOATING state
+    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(V1_EN_GPIO_Port, V1_EN_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(W1_EN_GPIO_Port, W1_EN_Pin, GPIO_PIN_RESET);
+
+
+    HAL_Delay(5000); //wait 5 seconds
+
+    //set phases to LOW state
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_1, 0);
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_2, 0);
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_3, 0);
+
+
+    HAL_Delay(5000); //wait 5 seconds
+
+    //set phases to HIGH state (90% pwm - bootstraping does not allow 100%)
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_1, 3500);
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_2, 3500);
+    __HAL_TIM_SET_COMPARE(&timerUsed, TIM_CHANNEL_3, 3500);
+    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(V1_EN_GPIO_Port, V1_EN_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(W1_EN_GPIO_Port, W1_EN_Pin, GPIO_PIN_SET);
+
+    HAL_Delay(5000); //wait 5 seconds
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
