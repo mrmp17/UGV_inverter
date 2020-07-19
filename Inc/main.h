@@ -69,6 +69,8 @@ void Error_Handler(void);
 #define PWM_IN_2_GPIO_Port GPIOE
 #define PWM_IN_1_Pin GPIO_PIN_6
 #define PWM_IN_1_GPIO_Port GPIOE
+#define M2H1_Pin GPIO_PIN_13
+#define M2H1_GPIO_Port GPIOC
 #define M2H2_Pin GPIO_PIN_14
 #define M2H2_GPIO_Port GPIOC
 #define M2H3_Pin GPIO_PIN_15
@@ -149,6 +151,8 @@ void Error_Handler(void);
 #define U1_EN_GPIO_Port GPIOB
 #define M3H1_Pin GPIO_PIN_6
 #define M3H1_GPIO_Port GPIOB
+#define M3H2_Pin GPIO_PIN_7
+#define M3H2_GPIO_Port GPIOB
 #define M3H3_Pin GPIO_PIN_8
 #define M3H3_GPIO_Port GPIOB
 #define M4H1_Pin GPIO_PIN_9
