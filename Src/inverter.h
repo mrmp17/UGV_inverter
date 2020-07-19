@@ -32,10 +32,15 @@ private:
 
     //timer, timer_ch, en_port, en_pin arrays
     const TIM_HandleTypeDef htim_list [4] = {htim2, htim1, htim3, htim4}; //timer handlers
-    const uint16_t timch_U [4] = {TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_1}; //phase U timer channels
-    const uint16_t timch_V [4] = {TIM_CHANNEL_3, TIM_CHANNEL_1, TIM_CHANNEL_1}; //phase V timer channels
-    const uint16_t timch_W [4] = {TIM_CHANNEL_3, TIM_CHANNEL_1, TIM_CHANNEL_1}; //phase W timer channels
-    const GPIO_TypeDef enport_U [4] = {U1_EN_GPIO_Port, U1_EN_GPIO_Port, U1_EN_GPIO_Port, U1_EN_GPIO_Port};
+    const uint16_t timch_U [4] = {TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_3, TIM_CHANNEL_3}; //phase U timer channels
+    const uint16_t timch_V [4] = {TIM_CHANNEL_3, TIM_CHANNEL_2, TIM_CHANNEL_2, TIM_CHANNEL_2}; //phase V timer channels
+    const uint16_t timch_W [4] = {TIM_CHANNEL_1, TIM_CHANNEL_1, TIM_CHANNEL_1, TIM_CHANNEL_1}; //phase W timer channels
+    const GPIO_TypeDef* enport_U [4] = {U1_EN_GPIO_Port, U2_EN_GPIO_Port, U3_EN_GPIO_Port, U4_EN_GPIO_Port}; //phase U enable ports
+    const GPIO_TypeDef* enport_V [4] = {V1_EN_GPIO_Port, V2_EN_GPIO_Port, V3_EN_GPIO_Port, V4_EN_GPIO_Port}; //phase V enable ports
+    const GPIO_TypeDef* enport_W [4] = {W1_EN_GPIO_Port, W2_EN_GPIO_Port, W3_EN_GPIO_Port, W4_EN_GPIO_Port}; //phase W enable ports
+    const uint16_t enpin_U [4] = {U1_EN_Pin, U2_EN_Pin, U3_EN_Pin, U4_EN_Pin}; //phase U enable pins
+    const uint16_t enpin_V [4] = {V1_EN_Pin, V2_EN_Pin, V3_EN_Pin, V4_EN_Pin}; //phase V enable pins
+    const uint16_t enpin_W [4] = {W1_EN_Pin, W2_EN_Pin, W3_EN_Pin, W4_EN_Pin}; //phase U enable pins
 
 
 };
