@@ -109,6 +109,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_SET)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
