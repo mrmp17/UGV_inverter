@@ -78,6 +78,15 @@
   } \
 }
 
+//this macro reads hall signals for specified channel and calculates a position number (which needs to be mapped to commutation waveform step
+//values "0" and "7" are non-valid!! todo: implement validity check somewhere
+#define read_hall(ch, pos_byte){ \
+  pos_byte = 0u; \
+  pos_byte = uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][0], hallpin_list[ch][0])== GPIO_PIN_SET); \
+  pos_byte |= uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][1], hallpin_list[ch][1])== GPIO_PIN_SET)<<1; \
+  pos_byte |= uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][2], hallpin_list[ch][2])== GPIO_PIN_SET)<<2; \
+}
+
 
 
 
@@ -104,7 +113,8 @@ class inverter {
 public:
     inverter();
     void begin();
-    void test();
+    void test(); //only for testing
+    bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
 
 
 private:
@@ -130,17 +140,24 @@ private:
     GPIO_TypeDef* hallport_list [4][3] = {{M1H1_GPIO_Port, M1H2_GPIO_Port, M1H3_GPIO_Port}, //enable ports for BLDC channels and halls
                                           {M2H1_GPIO_Port, M2H2_GPIO_Port, M2H3_GPIO_Port},
                                           {M3H1_GPIO_Port, M3H2_GPIO_Port, M3H3_GPIO_Port},
-                                          {M4H1_GPIO_Port, M4H2_GPIO_Port, M4H3_GPIO_Port} }; //outer: BLDC channel (1;2;3;4), Inner: halls (1;2;3)
+                                          {M4H1_GPIO_Port, M4H2_GPIO_Port, M4H3_GPIO_Port} }; //outer: BLDC channel (1;2;3;4), Inner: hall sensor (1;2;3)
 
     uint16_t hallpin_list [4][3] = {{M1H1_Pin, M1H2_Pin, M1H3_Pin}, //enable pins for BLDC channels and halls
                                     {M2H1_Pin, M2H2_Pin, M2H3_Pin},
                                     {M3H1_Pin, M3H2_Pin, M3H3_Pin},
-                                    {M4H1_Pin, M4H2_Pin, M4H3_Pin}}; //outer: BLDC channel (1;2;3;4), Inner: phase (1;2;3)
+                                    {M4H1_Pin, M4H2_Pin, M4H3_Pin}}; //outer: BLDC channel (1;2;3;4), Inner: hall sensor (1;2;3)
 
     //use defines WVF_LOW ,WVF_PWM, WVF_FLT to access these arrays
     uint8_t phase_wvf_U [2][6] = {{WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT},{WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase U)
     uint8_t phase_wvf_V [2][6] = {{WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW},{WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase V)
     uint8_t phase_wvf_W [2][6] = {{WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM},{WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase W)
+
+
+    //hall mapping for every channel. index: hall position  value at index: corresponding commutation step
+    uint8_t hall_mapping [4][6] = {{0,0,0,0,0,0},
+                                   {0,0,0,0,0,0},
+                                   {0,0,0,0,0,0},
+                                   {0,0,0,0,0,0}};
 
 
 
