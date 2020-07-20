@@ -25,7 +25,7 @@ void inverter::begin() {
 }
 
 void inverter::test() {
-  bool direction = 1;
+  bool direction = false;
   uint16_t pwm = 500;
 
   int n = 0;
@@ -33,7 +33,7 @@ void inverter::test() {
     n++;
     for(uint8_t i = 0; i<6; i++){
       set_commutation_step(i, CH2, direction, pwm);
-      HAL_Delay(50);
+      HAL_Delay(200);
     }
   }
 

@@ -87,8 +87,8 @@ void Error_Handler(void);
 #define W1_PWM_GPIO_Port GPIOA
 #define U1_PWM_Pin GPIO_PIN_1
 #define U1_PWM_GPIO_Port GPIOA
-#define W1_PWMA2_Pin GPIO_PIN_2
-#define W1_PWMA2_GPIO_Port GPIOA
+#define V1_PWM_Pin GPIO_PIN_2
+#define V1_PWM_GPIO_Port GPIOA
 #define GPIO2_TP_Pin GPIO_PIN_3
 #define GPIO2_TP_GPIO_Port GPIOA
 #define VBAT_SNS_Pin GPIO_PIN_7
