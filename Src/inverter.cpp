@@ -23,3 +23,7 @@ void inverter::begin() {
   }
   //todo: init analog stuff
 }
+
+void inverter::test() {
+
+}
