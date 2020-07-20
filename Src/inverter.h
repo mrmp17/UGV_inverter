@@ -19,6 +19,10 @@
 #define PH_V 1
 #define PH_W 2
 
+#define WVF_LOW 0
+#define WVF_FLT 1
+#define WVF_PWM 2
+
 //set enable pin to low and pwm to 0 (low) (floats phase)
 #define set_float(ch, phase) { \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_RESET); \
@@ -37,7 +41,42 @@
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_SET); \
 }
 
-//read halls and compile step value
+//macro sets commutation step to selected motor channel with given pwm and direction
+#define set_commutation_step(step, ch, dir, pwm_val) { \
+  switch (phase_wvf_U[dir][step]){ \
+    case WVF_FLT: \
+      set_float(ch, PH_U); \
+    break; \
+    case WVF_LOW: \
+      set_low(ch, PH_U); \
+    break; \
+    case WVF_PWM: \
+      set_pwm(ch, PH_U, pwm_val); \
+    break; \
+  } \
+  switch (phase_wvf_V[dir][step]){ \
+    case WVF_FLT: \
+      set_float(ch, PH_V); \
+    break; \
+    case WVF_LOW: \
+      set_low(ch, PH_V); \
+    break; \
+    case WVF_PWM: \
+      set_pwm(ch, PH_V, pwm_val); \
+    break; \
+  } \
+  switch (phase_wvf_W[dir][step]){ \
+    case WVF_FLT: \
+      set_float(ch, PH_W); \
+    break; \
+    case WVF_LOW: \
+      set_low(ch, PH_W); \
+    break; \
+    case WVF_PWM: \
+      set_pwm(ch, PH_W, pwm_val); \
+    break; \
+  } \
+}
 
 
 
@@ -97,6 +136,11 @@ private:
                                     {M2H1_Pin, M2H2_Pin, M2H3_Pin},
                                     {M3H1_Pin, M3H2_Pin, M3H3_Pin},
                                     {M4H1_Pin, M4H2_Pin, M4H3_Pin}}; //outer: BLDC channel (1;2;3;4), Inner: phase (1;2;3)
+
+    //use defines WVF_LOW ,WVF_PWM, WVF_FLT to access these arrays
+    uint8_t phase_wvf_U [2][6] = {{WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT},{WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase U)
+    uint8_t phase_wvf_V [2][6] = {{WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW},{WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase V)
+    uint8_t phase_wvf_W [2][6] = {{WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM},{WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase W)
 
 
 

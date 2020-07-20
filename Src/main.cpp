@@ -107,6 +107,7 @@ int main(void)
 
   inverter.begin();
   HAL_Delay(2000);
+  HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
 
   /* USER CODE END 2 */
@@ -116,7 +117,7 @@ int main(void)
   while (1)
   {
     inverter.test();
-    HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
+    //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
 //    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 2000);
 //    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_SET);
