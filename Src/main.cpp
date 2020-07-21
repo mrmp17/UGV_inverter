@@ -126,7 +126,7 @@ int main(void)
   serial_01.begin();
 
   inverter.begin();
-  HAL_Delay(2000);
+  HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
 
@@ -136,13 +136,14 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    //inverter.test();
+    inverter.test();
 
 
-    uint8_t result[6] = {0};
-    debug_print("new test: ###\n");
-    inverter.hall_auto_map(CH2, result);
-    HAL_Delay(5000);
+//    uint8_t result[7] = {0};
+//    debug_print("new test: ###\n");
+//    inverter.hall_auto_map(CH2, result);
+//    debug_print("commutation array: [%d,%d,%d,%d,%d,%d,%d]\n", result[0],result[1],result[2],result[3],result[4],result[5],result[6]);
+//    HAL_Delay(5000);
 
     //debug_print("Hello world!\n");
     //HAL_Delay(100);

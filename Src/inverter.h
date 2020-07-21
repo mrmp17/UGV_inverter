@@ -154,10 +154,10 @@ private:
 
 
     //hall mapping for every channel. index: hall position  value at index: corresponding commutation step
-    uint8_t hall_mapping [4][6] = {{0,0,0,0,0,0},
-                                   {1,5,4,6,2,3},
-                                   {0,0,0,0,0,0},
-                                   {0,0,0,0,0,0}};
+    uint8_t hall_mapping [4][7] = {{0,0,0,0,0,0,0},
+                                   {0,1,3,2,5,0,4},
+                                   {0,0,0,0,0,0,0},
+                                   {0,0,0,0,0,0,0}};
 
 
 

@@ -21,8 +21,8 @@ extern UART_HandleTypeDef huart3;
 
 
 
-#define DMA_BUFF_LEN 128
-#define SERIAL_BUFF_LEN 256
+#define DMA_BUFF_LEN 256
+#define SERIAL_BUFF_LEN 512
 
 extern  "C" {
 void USART3_IRQHandler(void);
