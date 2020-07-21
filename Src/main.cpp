@@ -30,6 +30,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "inverter.h"
+#include "Serial.h"
 
 /* USER CODE END Includes */
 
@@ -105,6 +106,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   inverter inverter;
 
+  serial_01.begin();
+
   inverter.begin();
   HAL_Delay(2000);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
@@ -118,8 +121,11 @@ int main(void)
   {
     //inverter.test();
 
-    uint8_t result[6] = {0};
-    inverter.hall_auto_map(CH2, result);
+//    uint8_t result[6] = {0};
+//    inverter.hall_auto_map(CH2, result);
+
+    serial_01.write(0x4B);
+    HAL_Delay(1000);
 
     //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
