@@ -26,14 +26,14 @@ void inverter::begin() {
 
 void inverter::test() {
   bool direction = false;
-  uint16_t pwm = 500;
+  uint16_t pwm = 200;
 
   int n = 0;
   while(1){
     n++;
     for(uint8_t i = 0; i<6; i++){
       set_commutation_step(i, CH2, direction, pwm);
-      HAL_Delay(200);
+      HAL_Delay(50);
     }
   }
 
@@ -41,12 +41,17 @@ void inverter::test() {
 
 //this function needs pointer to an array with size of 6 bytes!! (currently only returns array of correct mapping)
 bool inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
-  uint16_t map_pwm = 400; //raw timer pwm value with which to drive motor during mapping
+  uint16_t map_pwm = 200; //raw timer pwm value with which to drive motor during mapping
+  uint8_t pos = 0;
+  uint8_t oldPos = 0;
+
   for (uint8_t i = 0; i < 6; ++i) {
     set_commutation_step(i, motor_ch, 0, map_pwm); //set commutation to fixed step
-    HAL_Delay(500); //wait for the motor to settle in a position
-    uint8_t hall_pos;
-    read_hall(motor_ch, hall_pos);
-    *(array_ptr+i) = hall_pos;
+    HAL_Delay(10);
+    read_hall(motor_ch, pos);
+    oldPos = pos;
+    *(array_ptr+i)= pos;
+    HAL_Delay(200);
+
   }
 }

@@ -116,7 +116,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    inverter.test();
+    //inverter.test();
+
+    uint8_t result[6] = {0};
+    inverter.hall_auto_map(CH2, result);
+
     //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
 //    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 2000);
