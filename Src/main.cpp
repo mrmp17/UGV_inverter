@@ -31,6 +31,8 @@
 /* USER CODE BEGIN Includes */
 #include "inverter.h"
 #include "Serial.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -62,6 +64,21 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void debug_print(const char *format, ...){
+  //return;
+  char formatedString[128] = {0};
+  va_list arglist;
+  va_start(arglist, format);
+  int len = vsnprintf(formatedString, sizeof(formatedString), format, arglist);
+  uint16_t n = 0;
+  //comment out this block if carriage return not needed (change serial_01.write len!!!)
+  while(formatedString[n] != 0) n++;
+  formatedString[n] = 0xD;
+  //####
+  va_end(arglist);
+  while(serial_01.txOngoing);
+  serial_01.write(reinterpret_cast<uint8_t*>(formatedString), len+1);
+}
 
 /* USER CODE END 0 */
 
@@ -121,11 +138,14 @@ int main(void)
   {
     //inverter.test();
 
-//    uint8_t result[6] = {0};
-//    inverter.hall_auto_map(CH2, result);
 
-    serial_01.write(0x4B);
-    HAL_Delay(1000);
+    uint8_t result[6] = {0};
+    debug_print("new test: ###\n");
+    inverter.hall_auto_map(CH2, result);
+    HAL_Delay(5000);
+
+    //debug_print("Hello world!\n");
+    //HAL_Delay(100);
 
     //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 

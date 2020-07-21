@@ -33,6 +33,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+void debug_print(const char *format, ...);
 
 /* USER CODE END Includes */
 
