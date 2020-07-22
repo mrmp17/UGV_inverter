@@ -53,6 +53,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+inverter inverter;
 
 /* USER CODE END PV */
 
@@ -78,6 +79,20 @@ void debug_print(const char *format, ...){
   va_end(arglist);
   while(serial_01.txOngoing);
   serial_01.write(reinterpret_cast<uint8_t*>(formatedString), len+1);
+}
+
+
+/**
+  * @brief This function handles TIM8 trigger and commutation interrupts and TIM14 global interrupt.
+  */
+void TIM8_TRG_COM_TIM14_IRQHandler(void){
+  /* USER CODE BEGIN TIM8_TRG_COM_TIM14_IRQn 0 */
+  //inverter.interrupt_handler();
+  /* USER CODE END TIM8_TRG_COM_TIM14_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim14);
+  /* USER CODE BEGIN TIM8_TRG_COM_TIM14_IRQn 1 */
+
+  /* USER CODE END TIM8_TRG_COM_TIM14_IRQn 1 */
 }
 
 /* USER CODE END 0 */
@@ -121,8 +136,8 @@ int main(void)
   MX_TIM14_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  inverter inverter;
 
+  //HAL_TIM_Base_Start_IT(&htim14); //start inverter interrupt timer
   serial_01.begin();
 
   inverter.begin();
@@ -130,7 +145,7 @@ int main(void)
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
   inverter.enable_motor(CH2);
-  inverter.set_motor_pwm(CH2, 100);
+  inverter.set_motor_pwm(CH2, 400);
 
 
 

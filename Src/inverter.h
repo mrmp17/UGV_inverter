@@ -109,9 +109,6 @@
 
 
 
-
-
-
 class inverter {
 
 public:
