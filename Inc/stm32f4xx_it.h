@@ -59,6 +59,7 @@ void SysTick_Handler(void);
 void DMA1_Stream1_IRQHandler(void);
 void DMA1_Stream3_IRQHandler(void);
 void ADC_IRQHandler(void);
+void EXTI9_5_IRQHandler(void);
 //void USART3_IRQHandler(void); //transfered to serial.cpp @matej
 //void TIM8_TRG_COM_TIM14_IRQHandler(void); //transfered to Inverter.cpp @matej
 void DMA2_Stream0_IRQHandler(void);
