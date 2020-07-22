@@ -29,7 +29,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "inverter.h"
+#include "Inverter.h"
 #include "Serial.h"
 #include <stdarg.h>
 #include <stdio.h>
@@ -53,7 +53,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-inverter inverter;
+Inverter inverter;
+
 
 /* USER CODE END PV */
 
@@ -87,7 +88,7 @@ void debug_print(const char *format, ...){
   */
 void TIM8_TRG_COM_TIM14_IRQHandler(void){
   /* USER CODE BEGIN TIM8_TRG_COM_TIM14_IRQn 0 */
-  //inverter.interrupt_handler();
+  inverter.interrupt_handler();
   /* USER CODE END TIM8_TRG_COM_TIM14_IRQn 0 */
   HAL_TIM_IRQHandler(&htim14);
   /* USER CODE BEGIN TIM8_TRG_COM_TIM14_IRQn 1 */
@@ -104,6 +105,7 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+
 
   /* USER CODE END 1 */
 
@@ -137,9 +139,9 @@ int main(void)
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  //HAL_TIM_Base_Start_IT(&htim14); //start inverter interrupt timer
-  serial_01.begin();
+  HAL_TIM_Base_Start_IT(&htim14); //start Inverter interrupt timer
 
+  serial_01.begin();
   inverter.begin();
   HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
@@ -156,13 +158,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 
-    inverter.interrupt_handler();
+    //inverter.interrupt_handler();
 
 
 
 //    uint8_t result[7] = {0};
 //    debug_print("new test: ###\n");
-//    inverter.hall_auto_map(CH2, result);
+//    Inverter.hall_auto_map(CH2, result);
 //    debug_print("commutation array: [%d,%d,%d,%d,%d,%d,%d]\n", result[0],result[1],result[2],result[3],result[4],result[5],result[6]);
 //    HAL_Delay(5000);
 

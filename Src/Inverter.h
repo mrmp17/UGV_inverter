@@ -30,18 +30,18 @@
 //set enable pin to low and pwm to 0 (low) (floats phase)
 #define set_float(ch, phase) { \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_RESET); \
-  __HAL_TIM_SET_COMPARE(&htim_list[ch], tim_ch_list[ch][phase], 0); \
+  __HAL_TIM_SET_COMPARE(htim_list[ch], tim_ch_list[ch][phase], 0); \
 }
 
 //set enable pin to high and pwm to 0 (low) (pulls phase down)
 #define set_low(ch, phase) { \
-  __HAL_TIM_SET_COMPARE(&htim_list[ch], tim_ch_list[ch][phase], 0); \
+  __HAL_TIM_SET_COMPARE(htim_list[ch], tim_ch_list[ch][phase], 0); \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_SET); \
 }
 
 //set enable pin to high and pwm to #pwm# (pwming) (pulls phase "high" - pwm)
 #define set_pwm(ch, phase, pwm_val) { \
-  __HAL_TIM_SET_COMPARE(&htim_list[ch], tim_ch_list[ch][phase], pwm_val); \
+  __HAL_TIM_SET_COMPARE(htim_list[ch], tim_ch_list[ch][phase], pwm_val); \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_SET); \
 }
 
@@ -109,10 +109,10 @@
 
 
 
-class inverter {
+class Inverter {
 
 public:
-    inverter();
+    Inverter();
     void begin();
     void test(); //only for testing
     bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
@@ -132,7 +132,7 @@ private:
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
 
 
-    TIM_HandleTypeDef htim_list [4] = {htim2, htim1, htim3, htim4}; //timer handlers
+    TIM_HandleTypeDef *htim_list [4] = {&htim2, &htim1, &htim3, &htim4}; //timer handlers
 
     uint16_t tim_ch_list [4][3] = {{TIM_CHANNEL_2, TIM_CHANNEL_3, TIM_CHANNEL_1}, //timer channels for BLDC channels and phases
                                    {TIM_CHANNEL_3, TIM_CHANNEL_2, TIM_CHANNEL_1},
@@ -178,6 +178,7 @@ private:
 
 
 };
+
 
 
 #endif //INVERTER_4CH_INVERTER_H

@@ -2,31 +2,27 @@
 // Created by matej on 19/07/2020.
 //
 
-#include "inverter.h"
+#include "Inverter.h"
 
 
-
-
-
-inverter::inverter() {
+Inverter::Inverter() {
 
 }
 
 
 
-
-void inverter::begin() {
+void Inverter::begin() {
   //start all pwm channels (set to 0 by default)
   for (uint8_t i = 0; i < 4; ++i) { //goes through all motor channels
     for (uint8_t j = 0; j < 3; ++j) { //goes to all phases for given channel
-      HAL_TIM_PWM_Start(&htim_list[i], tim_ch_list[i][j]);
+      HAL_TIM_PWM_Start(htim_list[i], tim_ch_list[i][j]);
       set_float(i,j); //set float, to be sure
     }
   }
   //todo: init analog stuff
 }
 
-void inverter::test() {
+void Inverter::test() {
   bool direction = false;
   uint16_t pwm = 1000;
 
@@ -55,7 +51,7 @@ void inverter::test() {
 }
 
 //this function needs pointer to an array with size of 6 bytes!! (currently only returns array of correct mapping)
-bool inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
+bool Inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
   uint16_t map_pwm = 300; //raw timer pwm value with which to drive motor during mapping
   uint8_t pos = 0;
   uint8_t oldPos = 0;
@@ -78,10 +74,9 @@ bool inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
 }
 
 
-void inverter::interrupt_handler() {
+void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
-  //
-  // HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
+   HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     if (enable_cmd_list[i]){ //if motor enabled
       read_hall(i, hall_pos); //read hall position
@@ -93,12 +88,12 @@ void inverter::interrupt_handler() {
       set_float(i, PH_U);
     }
   }
-  //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
   //todo: implement encoder counter
   //todo: analog stuff
 }
 
-bool inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with CHx defines
+bool Inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with CHx defines
   if(pwm >= MIN_PWM_CMD && pwm <= MAX_PWM_CMD){
     pwm_cmd_list[channel] = pwm;
     return true;
@@ -109,12 +104,12 @@ bool inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with C
 }
 
 
-void inverter::enable_motor(uint8_t channel) {
+void Inverter::enable_motor(uint8_t channel) {
   pwm_cmd_list[channel] = 0; //set pwm to 0 before enabling motor
   enable_cmd_list[channel] = true; //enable motor
 }
 
-void inverter::disable_motor(uint8_t channel) {
+void Inverter::disable_motor(uint8_t channel) {
   enable_cmd_list[channel] = false; //disable motor
   pwm_cmd_list[channel] = 0; //set pwm to 0 after disabling motor
 }

@@ -34,6 +34,7 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 void debug_print(const char *format, ...);
+void TIM8_TRG_COM_TIM14_IRQHandler(void);
 
 /* USER CODE END Includes */
 
