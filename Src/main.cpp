@@ -33,6 +33,7 @@
 #include "Serial.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include "input_PWM.h"
 
 /* USER CODE END Includes */
 
@@ -143,10 +144,11 @@ int main(void)
 
   serial_01.begin();
   inverter.begin();
+  input.begin();
   HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
-  inverter.enable_motor(CH2);
+  //inverter.enable_motor(CH2);
   inverter.set_motor_pwm(CH2, 400);
 
 
@@ -157,6 +159,17 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
+
+    uint16_t val = 0;
+    val = input.get_pulse(PWM1);
+    HAL_Delay(500);
+
+
+//    uint16_t t1 = __HAL_TIM_GET_COUNTER(&htim13);
+//    HAL_Delay(40);
+//    uint16_t t2 = __HAL_TIM_GET_COUNTER(&htim13);
+//    uint16_t time = t2-t1;
+
 
     //inverter.interrupt_handler();
 

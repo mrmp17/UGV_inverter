@@ -76,7 +76,7 @@ bool Inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
 
 void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
-   HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     if (enable_cmd_list[i]){ //if motor enabled
       read_hall(i, hall_pos); //read hall position
@@ -88,7 +88,7 @@ void Inverter::interrupt_handler() {
       set_float(i, PH_U);
     }
   }
-  HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
   //todo: implement encoder counter
   //todo: analog stuff
 }
