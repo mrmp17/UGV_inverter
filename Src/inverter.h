@@ -23,6 +23,10 @@
 #define WVF_FLT 1
 #define WVF_PWM 2
 
+
+#define MAX_PWM_CMD 3800
+#define MIN_PWM_CMD 0
+
 //set enable pin to low and pwm to 0 (low) (floats phase)
 #define set_float(ch, phase) { \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_RESET); \
@@ -116,8 +120,19 @@ public:
     void test(); //only for testing
     bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
 
+    void interrupt_handler(); //
+
+    bool set_motor_pwm(uint8_t channel, uint16_t pwm); // 0 to 3800
+    void enable_motor(uint8_t channel);
+    void disable_motor(uint8_t channel);
+
 
 private:
+
+
+    uint16_t pwm_cmd_list [4] = {0};  //pwm commands for motor channels. call this with CHx defines
+    bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
+    bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
 
 
     TIM_HandleTypeDef htim_list [4] = {htim2, htim1, htim3, htim4}; //timer handlers
@@ -154,10 +169,10 @@ private:
 
 
     //hall mapping for every channel. index: hall position  value at index: corresponding commutation step
-    uint8_t hall_mapping [4][7] = {{0,0,0,0,0,0,0},
+    uint8_t hall_mapping [4][7] = {{0,1,3,2,5,0,4},
                                    {0,1,3,2,5,0,4},
-                                   {0,0,0,0,0,0,0},
-                                   {0,0,0,0,0,0,0}};
+                                   {0,1,3,2,5,0,4},
+                                   {0,1,3,2,5,0,4}};
 
 
 

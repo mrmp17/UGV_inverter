@@ -129,14 +129,20 @@ int main(void)
   HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
+  inverter.enable_motor(CH2);
+  inverter.set_motor_pwm(CH2, 100);
+
+
+
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-    inverter.test();
+  while (1) {
+
+    inverter.interrupt_handler();
+
 
 
 //    uint8_t result[7] = {0};
@@ -145,17 +151,6 @@ int main(void)
 //    debug_print("commutation array: [%d,%d,%d,%d,%d,%d,%d]\n", result[0],result[1],result[2],result[3],result[4],result[5],result[6]);
 //    HAL_Delay(5000);
 
-    //debug_print("Hello world!\n");
-    //HAL_Delay(100);
-
-    //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
-
-//    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 2000);
-//    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_SET);
-//    HAL_Delay(1000);
-//    __HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_2, 0);
-//    HAL_GPIO_WritePin(U1_EN_GPIO_Port, U1_EN_Pin, GPIO_PIN_RESET);
-//    HAL_Delay(1000);
 
     /* USER CODE END WHILE */
 

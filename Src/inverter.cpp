@@ -74,3 +74,56 @@ bool inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
 
   }
 }
+
+
+void inverter::interrupt_handler() {
+  static uint8_t hall_pos;
+  for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
+    if (enable_cmd_list[i]){ //if motor enabled
+      read_hall(i, hall_pos); //read hall position
+      set_commutation_step(hall_mapping[i][hall_pos], i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
+    }
+    else{ //set all phases to float if motor disabled
+      set_float(i, PH_U);
+      set_float(i, PH_U);
+      set_float(i, PH_U);
+    }
+  }
+  //todo: implement encoder counter
+  //todo: analog stuff
+}
+
+bool inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with CHx defines
+  if(pwm >= MIN_PWM_CMD && pwm <= MAX_PWM_CMD){
+    pwm_cmd_list[channel] = pwm;
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+
+void inverter::enable_motor(uint8_t channel) {
+  pwm_cmd_list[channel] = 0; //set pwm to 0 before enabling motor
+  enable_cmd_list[channel] = true; //enable motor
+}
+
+void inverter::disable_motor(uint8_t channel) {
+  enable_cmd_list[channel] = false; //disable motor
+  pwm_cmd_list[channel] = 0; //set pwm to 0 after disabling motor
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
