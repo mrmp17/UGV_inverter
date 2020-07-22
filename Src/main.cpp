@@ -136,6 +136,7 @@ int main(void)
   MX_I2C3_Init();
   MX_TIM14_Init();
   MX_USART3_UART_Init();
+  MX_TIM13_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_TIM_Base_Start_IT(&htim14); //start Inverter interrupt timer
