@@ -13,6 +13,11 @@
 #define PWM1 0
 #define PWM2 1
 
+#define MIN_PWM 950
+#define MAX_PWM 2050
+#define PMM_MID 1500
+#define FAILSAFE_THR 1000
+
 extern "C" {
   void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
   void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
@@ -25,11 +30,15 @@ public:
 
     void begin();
     uint16_t get_pulse(uint8_t channel);
+    bool is_failsafe(uint8_t channel);
 
 
     uint16_t pwm_width [2] = {0}; //array for storing pwm width
     uint16_t pwm_rising_time [2] = {0}; //array for storing rising edge timer count
     uint16_t pwm_falling_time [2] = {0}; //array for storing rising edge timer count
+    bool rise_detected [2] = {0}; //checked every timer period to see if signal is being received
+    bool pwm_recvd [2] = {0}; //true if at least one rising edge detected in each timer period
+
 private:
 
 

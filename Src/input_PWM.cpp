@@ -11,7 +11,15 @@ input_PWM::input_PWM() {
 }
 
 uint16_t input_PWM::get_pulse(uint8_t channel) {
-  return pwm_width[channel];
+  //return pwm value only if pwm is detected and measured width is valid
+  if (pwm_width[channel] >= MIN_PWM && pwm_width[channel] <= MAX_PWM && pwm_recvd[channel]){
+    return pwm_width[channel];
+  }
+  else return 0; //return 0 if something's wrong with pwm
+}
+
+bool input_PWM::is_failsafe(uint8_t channel) {
+  return pwm_width[channel]<FAILSAFE_THR;
 }
 
 
@@ -27,6 +35,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     if(HAL_GPIO_ReadPin(PWM_IN_1_GPIO_Port, PWM_IN_1_Pin)==GPIO_PIN_SET){ //rising edge
       //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
       input.pwm_rising_time[PWM1] = __HAL_TIM_GET_COUNTER(&htim13);
+      input.rise_detected[PWM1] = true;
     }
     if(HAL_GPIO_ReadPin(PWM_IN_1_GPIO_Port, PWM_IN_1_Pin)==GPIO_PIN_RESET){ //falling edge
       //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
@@ -35,4 +44,27 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
     }
   }
 
+  if(GPIO_Pin == PWM_IN_2_Pin){
+    if(HAL_GPIO_ReadPin(PWM_IN_2_GPIO_Port, PWM_IN_2_Pin)==GPIO_PIN_SET){ //rising edge
+      //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
+      input.pwm_rising_time[PWM2] = __HAL_TIM_GET_COUNTER(&htim13);
+      input.rise_detected[PWM2] = true;
+    }
+    if(HAL_GPIO_ReadPin(PWM_IN_2_GPIO_Port, PWM_IN_2_Pin)==GPIO_PIN_RESET){ //falling edge
+      //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
+      input.pwm_falling_time[PWM2] = __HAL_TIM_GET_COUNTER(&htim13);
+      input.pwm_width[PWM2] = input.pwm_falling_time[PWM2]-input.pwm_rising_time[PWM2];
+    }
+  }
+
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+  if(htim == &htim13){ //if pwm timer period elapsed
+    input.pwm_recvd[PWM1] = input.rise_detected[PWM1]; //at least one rising edge must be detected during timer period
+    input.rise_detected[PWM1] = false;
+
+    input.pwm_recvd[PWM2] = input.rise_detected[PWM2]; //at least one rising edge must be detected during timer period
+    input.rise_detected[PWM2] = false;
+  }
 }
