@@ -148,8 +148,8 @@ int main(void)
   HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
-  //inverter.enable_motor(CH2);
-  inverter.set_motor_pwm(CH2, 400);
+  inverter.enable_motor(CH2);
+  //inverter.set_motor_pwm(CH2, 400);
 
 
 
@@ -162,7 +162,14 @@ int main(void)
 
     uint16_t val = 0;
     val = input.get_pulse(PWM1);
-    HAL_Delay(500);
+
+    if(val<1500) val = 1500;
+    val -=1500;
+    val = val*5;
+    if(val <= 20) val = 0;
+    inverter.set_motor_pwm(CH2, 800);
+    debug_print("pwm: %d\n", val);
+    HAL_Delay(10);
 
 
 //    uint16_t t1 = __HAL_TIM_GET_COUNTER(&htim13);
