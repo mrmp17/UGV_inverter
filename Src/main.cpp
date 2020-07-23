@@ -33,6 +33,7 @@
 #include "Serial.h"
 #include <stdarg.h>
 #include <stdio.h>
+#include <math.h>
 #include "input_PWM.h"
 
 /* USER CODE END Includes */
@@ -97,6 +98,15 @@ void TIM8_TRG_COM_TIM14_IRQHandler(void){
   /* USER CODE END TIM8_TRG_COM_TIM14_IRQn 1 */
 }
 
+void diff_steer(float trans, float rot, float &left, float &right) {
+  float sum = abs(trans) + abs(rot);
+  float scale;
+  if(sum > 1.) scale = 1. - (sum - 1.) / 2.;
+  else scale = 1.;
+  left = scale * (trans - rot);
+  right = scale * (trans + rot);
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -148,8 +158,11 @@ int main(void)
   HAL_Delay(3500);
   HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
 
+  inverter.enable_motor(CH1);
   inverter.enable_motor(CH2);
-  //inverter.set_motor_pwm(CH2, 400);
+  inverter.enable_motor(CH3);
+  inverter.enable_motor(CH4);
+
 
 
 
@@ -162,21 +175,47 @@ int main(void)
 
     float thr = input.skidSteer_throttle();
     float str = input.skidSteer_steer();
-    int16_t thrf = (float)thr*1000;
-    int16_t strf = (float)str*1000;
-    debug_print("thr: %d, str: %d\n", thrf, strf);
+    //todo: skid steer calcs
 
-    uint16_t val = 0;
-    val = input.get_pulse(PWM1);
-    bool pwm_det = input.pwm_recvd[PWM1];
-    bool flsf = input.is_failsafe(PWM1);
-    //debug_print("PWM_1 input val: %d, is detected?: %d, flsf: %d\n", val, pwm_det, flsf);
+    float thr_left;
+    float thr_right;
+    diff_steer(thr, str, thr_left, thr_right);
 
-    val = input.get_pulse(PWM2);
-    pwm_det = input.pwm_recvd[PWM2];
-    flsf = input.is_failsafe(PWM2);
-    //debug_print("PWM_2 input val: %d, is detected?: %d, flsf: %d\n\n", val, pwm_det, flsf);
+    int16_t thrli = thr_left*1000;
+    int16_t thrri = thr_right*1000;
+    debug_print("left: %d, right: %d\n", thrli, thrri);
+
+    inverter.set_motor_float(CH1, thr_left);
+    inverter.set_motor_float(CH2, thr_left);
+    inverter.set_motor_float(CH3, -thr_right);
+    inverter.set_motor_float(CH4, -thr_right);
+
+//    inverter.set_motor_float(CH1, 0.1);
+//    inverter.set_motor_float(CH2, 0.1);
+//    inverter.set_motor_float(CH3, -0.1);
+//    inverter.set_motor_float(CH4, -0.1);
+
+
+
     HAL_Delay(50);
+
+
+
+//    int16_t thrf = (float)thr*1000;
+//    int16_t strf = (float)str*1000;
+//    debug_print("thr: %d, str: %d\n", thrf, strf);
+
+//    uint16_t val = 0;
+//    val = input.get_pulse(PWM1);
+//    bool pwm_det = input.pwm_recvd[PWM1];
+//    bool flsf = input.is_failsafe(PWM1);
+//    debug_print("PWM_1 input val: %d, is detected?: %d, flsf: %d\n", val, pwm_det, flsf);
+//
+//    val = input.get_pulse(PWM2);
+//    pwm_det = input.pwm_recvd[PWM2];
+//    flsf = input.is_failsafe(PWM2);
+//    debug_print("PWM_2 input val: %d, is detected?: %d, flsf: %d\n\n", val, pwm_det, flsf);
+//    HAL_Delay(50);
 
 
 

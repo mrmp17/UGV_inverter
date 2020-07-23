@@ -24,7 +24,8 @@
 #define WVF_PWM 2
 
 
-#define MAX_PWM_CMD 3800
+//#define MAX_PWM_CMD 3800
+#define MAX_PWM_CMD 1800 //safety
 #define MIN_PWM_CMD 0
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
@@ -122,7 +123,8 @@ public:
     bool set_motor_pwm(uint8_t channel, uint16_t pwm); // 0 to 3800
     void enable_motor(uint8_t channel);
     void disable_motor(uint8_t channel);
-
+    void set_motor_float (uint8_t channel, float throttle); // -1 to 1
+    void set_motor_direction (uint8_t channel, bool dir);
 
 private:
 
@@ -130,6 +132,8 @@ private:
     uint16_t pwm_cmd_list [4] = {0};  //pwm commands for motor channels. call this with CHx defines
     bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
+
+    float mapf(float x, float in_min, float in_max, float out_min, float out_max);
 
 
     TIM_HandleTypeDef *htim_list [4] = {&htim2, &htim1, &htim3, &htim4}; //timer handlers

@@ -115,6 +115,30 @@ void Inverter::disable_motor(uint8_t channel) {
 }
 
 
+void Inverter::set_motor_float(uint8_t channel, float throttle) {
+  if(throttle < 0){
+    set_motor_direction(channel, false);
+    throttle = -throttle;
+  }
+  else if(throttle > 0) set_motor_direction(channel, true);
+  if (throttle > 1) throttle = 1;
+  else if (throttle < -1) throttle = -1;
+
+  uint16_t pwm_val = mapf(throttle, 0, 1, (float)MIN_PWM_CMD, (float)MAX_PWM_CMD);
+  //debug_print("setting to: %d\n", pwm_val);
+  set_motor_pwm(channel, pwm_val);
+}
+
+
+void Inverter::set_motor_direction(uint8_t channel, bool dir) {
+  dir_cmd_list[channel] = dir;
+}
+
+
+float Inverter::mapf(float x, float in_min, float in_max, float out_min, float out_max){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
 
 
 
