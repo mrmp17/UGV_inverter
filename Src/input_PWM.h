@@ -17,6 +17,8 @@
 #define MAX_PWM 2050
 #define PMM_MID 1500
 #define FAILSAFE_THR 1000
+#define PWM_H 1950
+#define PWM_L 1050
 
 extern "C" {
   void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim);
@@ -32,6 +34,9 @@ public:
     uint16_t get_pulse(uint8_t channel);
     bool is_failsafe(uint8_t channel);
 
+    float skidSteer_throttle();
+    float skidSteer_steer();
+
 
     uint16_t pwm_width [2] = {0}; //array for storing pwm width
     uint16_t pwm_rising_time [2] = {0}; //array for storing rising edge timer count
@@ -41,6 +46,7 @@ public:
 
 private:
 
+    float mapf(float x, float in_min, float in_max, float out_min, float out_max);
 
 
 

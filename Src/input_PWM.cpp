@@ -22,6 +22,32 @@ bool input_PWM::is_failsafe(uint8_t channel) {
   return pwm_width[channel]<FAILSAFE_THR;
 }
 
+float input_PWM::mapf(float x, float in_min, float in_max, float out_min, float out_max){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+
+float input_PWM::skidSteer_throttle() {
+  uint16_t pwm = get_pulse(PWM1);
+  float temp = mapf((float)pwm, PWM_L, PWM_H, -1, 1); //return throttle mapped to 0-1
+  int16_t tempf = temp*1000;
+  //debug_print("got pwm_thr: %d, to: %d\n", pwm, tempf);
+  if(is_failsafe(PWM1) || !pwm_recvd[PWM1]) return 0;
+  if(temp > 1) return 1;
+  if(temp < -1) return -1;
+  return temp;
+}
+
+float input_PWM::skidSteer_steer() {
+  uint16_t pwm = get_pulse(PWM2);
+  float temp = mapf((float)pwm, PWM_L, PWM_H, -1, 1); //return steer mapped to 0-1
+  int16_t tempf = temp*1000;
+  //debug_print("got pwm_str: %d, to: %d\n", pwm, tempf);
+  if(is_failsafe(PWM2) || !pwm_recvd[PWM2]) return 0;
+  if(temp > 1) return 1;
+  if(temp < -1) return -1;
+  return temp;
+}
 
 
 

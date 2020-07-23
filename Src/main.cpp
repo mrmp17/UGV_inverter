@@ -160,17 +160,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 
+    float thr = input.skidSteer_throttle();
+    float str = input.skidSteer_steer();
+    int16_t thrf = (float)thr*1000;
+    int16_t strf = (float)str*1000;
+    debug_print("thr: %d, str: %d\n", thrf, strf);
+
     uint16_t val = 0;
     val = input.get_pulse(PWM1);
     bool pwm_det = input.pwm_recvd[PWM1];
     bool flsf = input.is_failsafe(PWM1);
-    debug_print("PWM_1 input val: %d, is detected?: %d, flsf: %d\n", val, pwm_det, flsf);
+    //debug_print("PWM_1 input val: %d, is detected?: %d, flsf: %d\n", val, pwm_det, flsf);
 
     val = input.get_pulse(PWM2);
     pwm_det = input.pwm_recvd[PWM2];
     flsf = input.is_failsafe(PWM2);
-    debug_print("PWM_2 input val: %d, is detected?: %d, flsf: %d\n\n", val, pwm_det, flsf);
-    HAL_Delay(100);
+    //debug_print("PWM_2 input val: %d, is detected?: %d, flsf: %d\n\n", val, pwm_det, flsf);
+    HAL_Delay(50);
+
 
 
 //    uint16_t t1 = __HAL_TIM_GET_COUNTER(&htim13);
