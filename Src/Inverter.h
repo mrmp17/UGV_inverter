@@ -9,6 +9,7 @@
 #include "tim.h"
 #include "gpio.h"
 #include "stm32f4xx_hal_gpio.h"
+#include "adc.h"
 
 //use these defines with macros, to define BLDC channel
 #define CH1 0
@@ -22,6 +23,20 @@
 #define WVF_LOW 0
 #define WVF_FLT 1
 #define WVF_PWM 2
+
+#define ADC_HANDLE &hadc1
+#define ADC_CH_NUM 6
+#define ADC_REF 3300
+#define ADC_MAX_VAL 4095
+
+#define ADC_VBAT 0
+#define ADC_CS1 1
+#define ADC_CS2 2
+#define ADC_CS3 3
+#define ADC_CS4 4
+#define ADC_TEMP 5
+
+#define ADC_VBAT_KOEF 15.33333333
 
 
 //#define MAX_PWM_CMD 3800
@@ -93,6 +108,11 @@
 }
 
 
+extern "C" {
+  void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle);
+}
+
+
 
 
 //tim2: ch1
@@ -126,12 +146,16 @@ public:
     void set_motor_float (uint8_t channel, float throttle); // -1 to 1
     void set_motor_direction (uint8_t channel, bool dir);
 
+    uint32_t get_ADC_voltage (uint8_t channel);
+
 private:
 
 
     uint16_t pwm_cmd_list [4] = {0};  //pwm commands for motor channels. call this with CHx defines
     bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
+
+    uint32_t ADC_buffer [6]; //adc buffer array
 
     float mapf(float x, float in_min, float in_max, float out_min, float out_max);
 

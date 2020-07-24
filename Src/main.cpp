@@ -107,6 +107,7 @@ void diff_steer(float trans, float rot, float &left, float &right) {
   right = scale * (trans + rot);
 }
 
+
 /* USER CODE END 0 */
 
 /**
@@ -173,6 +174,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 
+
     float thr = input.skidSteer_throttle();
     float str = input.skidSteer_steer();
     //todo: skid steer calcs
@@ -183,17 +185,20 @@ int main(void)
 
     int16_t thrli = thr_left*1000;
     int16_t thrri = thr_right*1000;
-    debug_print("left: %d, right: %d\n", thrli, thrri);
+    //debug_print("left: %d, right: %d\n", thrli, thrri);
 
-    inverter.set_motor_float(CH1, thr_left);
-    inverter.set_motor_float(CH2, thr_left);
-    inverter.set_motor_float(CH3, -thr_right);
-    inverter.set_motor_float(CH4, -thr_right);
+//    inverter.set_motor_float(CH1, thr_left);
+//    inverter.set_motor_float(CH2, thr_left);
+//    inverter.set_motor_float(CH3, -thr_right);
+//    inverter.set_motor_float(CH4, -thr_right);
 
 //    inverter.set_motor_float(CH1, 0.1);
 //    inverter.set_motor_float(CH2, 0.1);
 //    inverter.set_motor_float(CH3, -0.1);
 //    inverter.set_motor_float(CH4, -0.1);
+
+    uint32_t adcval = inverter.get_ADC_voltage(ADC_VBAT)*(float)ADC_VBAT_KOEF;
+    debug_print("cs1 adc voltage: %d\n", adcval);
 
 
 
