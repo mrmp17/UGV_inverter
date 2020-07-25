@@ -4,6 +4,8 @@
 
 #include "Inverter.h"
 
+Inverter inverter;
+
 
 Inverter::Inverter() {
 
@@ -147,10 +149,17 @@ uint32_t Inverter::get_ADC_voltage(uint8_t adc, uint8_t channel) {
   else if (adc == ADC_CONV_2) return (ADC2_buffer[channel]*ADC_REF)/ADC_MAX_VAL; //mV
 }
 
+void Inverter::OCP_handler() {
+  if(inverter.ADC2_buffer[ADC_CS1] > inverter. current_limit_max_val) OCP_float(CH1);
+  if(inverter.ADC2_buffer[ADC_CS2] > inverter. current_limit_max_val) OCP_float(CH2);
+  if(inverter.ADC2_buffer[ADC_CS3] > inverter. current_limit_max_val) OCP_float(CH3);
+  if(inverter.ADC2_buffer[ADC_CS4] > inverter. current_limit_max_val) OCP_float(CH4);
+}
+
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
   if(AdcHandle == ADC2_HANDLE){
-    HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
+    inverter.OCP_handler();
   }
 }
 

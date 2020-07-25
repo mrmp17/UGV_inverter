@@ -55,7 +55,6 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-Inverter inverter;
 
 
 /* USER CODE END PV */
@@ -198,7 +197,7 @@ int main(void)
 //    inverter.set_motor_float(CH3, -0.1);
 //    inverter.set_motor_float(CH4, -0.1);
 
-    uint32_t adcval = inverter.get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*(float)ADC_VBAT_KOEF;
+    uint32_t adcval = inverter.get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*(float)ADC_VBAT_COEF;
     //debug_print("bat adc voltage: %d\n", adcval);
 
     uint32_t csval = inverter.get_ADC_voltage(ADC_CONV_2, ADC_CS1);

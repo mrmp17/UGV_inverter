@@ -41,7 +41,11 @@
 #define ADC_CONV_1 0
 #define ADC_CONV_2 1
 
-#define ADC_VBAT_KOEF 15.33333333
+#define ADC_VBAT_COEF 15.33333333
+#define ADC_CURRENT_LIMIT_COEF 124.09090909 //adc_count per A
+#define ADC_CURRENT_MIDVAL 2048 //todo: tune this value
+
+#define MAX_CHANNEL_CURRENT 10.0 //A
 
 
 //#define MAX_PWM_CMD 3800
@@ -64,6 +68,13 @@
 #define set_pwm(ch, phase, pwm_val) { \
   __HAL_TIM_SET_COMPARE(htim_list[ch], tim_ch_list[ch][phase], pwm_val); \
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_SET); \
+}
+
+//current limit float channel command
+#define OCP_float(ch){ \
+  set_float(ch, PH_U); \
+  set_float(ch, PH_V); \
+  set_float(ch, PH_W); \
 }
 
 //macro sets commutation step to selected motor channel with given pwm and direction
@@ -112,6 +123,8 @@
   pos_byte |= uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][2], hallpin_list[ch][2])== GPIO_PIN_SET)<<2; \
 }
 
+//macro for reading channel currents
+
 
 extern "C" {
   void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle);
@@ -144,6 +157,7 @@ public:
     bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
 
     void interrupt_handler(); //
+    void OCP_handler();
 
     bool set_motor_pwm(uint8_t channel, uint16_t pwm); // 0 to 3800
     void enable_motor(uint8_t channel);
@@ -151,7 +165,10 @@ public:
     void set_motor_float (uint8_t channel, float throttle); // -1 to 1
     void set_motor_direction (uint8_t channel, bool dir);
 
+
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
+
+
 
 private:
 
@@ -160,8 +177,16 @@ private:
     bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
 
+
+    //raw max/min values for current limit.
+    const uint32_t current_limit_max_val = ADC_CURRENT_MIDVAL+(uint32_t)((float)MAX_CHANNEL_CURRENT*(float)ADC_CURRENT_LIMIT_COEF);
+    const uint32_t current_limit_min_val = ADC_CURRENT_MIDVAL-(uint32_t)((float)MAX_CHANNEL_CURRENT*(float)ADC_CURRENT_LIMIT_COEF);
+
+
     uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
     uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
+
+
 
     float mapf(float x, float in_min, float in_max, float out_min, float out_max);
 
@@ -212,6 +237,8 @@ private:
 
 
 };
+
+extern Inverter inverter;
 
 
 
