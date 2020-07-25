@@ -20,7 +20,8 @@ void Inverter::begin() {
     }
   }
   //todo: init analog stuff
-  HAL_ADC_Start_DMA(ADC_HANDLE, ADC_buffer, ADC_CH_NUM); //start adc in DMA mode, cont conversion
+  HAL_ADC_Start_DMA(ADC1_HANDLE, ADC1_buffer, ADC1_CH_NUM); //start adc in DMA mode, cont conversion
+  HAL_ADC_Start_DMA(ADC2_HANDLE, ADC2_buffer, ADC2_CH_NUM); //start adc in DMA mode, cont conversion
   HAL_Delay(1); //wait for a few adc conversions
 }
 
@@ -141,14 +142,15 @@ float Inverter::mapf(float x, float in_min, float in_max, float out_min, float o
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-uint32_t Inverter::get_ADC_voltage(uint8_t channel) {
-  return (ADC_buffer[channel]*ADC_REF)/ADC_MAX_VAL; //mV
+uint32_t Inverter::get_ADC_voltage(uint8_t adc, uint8_t channel) {
+  if(adc == ADC_CONV_1) return (ADC1_buffer[channel]*ADC_REF)/ADC_MAX_VAL; //mV
+  else if (adc == ADC_CONV_2) return (ADC2_buffer[channel]*ADC_REF)/ADC_MAX_VAL; //mV
 }
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
-  if(AdcHandle == ADC_HANDLE){
-    //HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
+  if(AdcHandle == ADC2_HANDLE){
+    HAL_GPIO_TogglePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin);
   }
 }
 

@@ -145,6 +145,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_ADC1_Init();
+  MX_ADC2_Init();
   MX_I2C3_Init();
   MX_TIM14_Init();
   MX_USART3_UART_Init();
@@ -197,8 +198,11 @@ int main(void)
 //    inverter.set_motor_float(CH3, -0.1);
 //    inverter.set_motor_float(CH4, -0.1);
 
-    uint32_t adcval = inverter.get_ADC_voltage(ADC_VBAT)*(float)ADC_VBAT_KOEF;
-    debug_print("cs1 adc voltage: %d\n", adcval);
+    uint32_t adcval = inverter.get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*(float)ADC_VBAT_KOEF;
+    //debug_print("bat adc voltage: %d\n", adcval);
+
+    uint32_t csval = inverter.get_ADC_voltage(ADC_CONV_2, ADC_CS1);
+    debug_print("cs1 adc voltage: %d\n", csval);
 
 
 
