@@ -45,7 +45,7 @@
 #define ADC_CURRENT_LIMIT_COEF 124.09090909 //adc_count per A
 #define ADC_CURRENT_MIDVAL 2048 //todo: tune this value
 
-#define MAX_CHANNEL_CURRENT 10.0 //A
+#define MAX_CHANNEL_CURRENT 2.0 //A
 
 
 //#define MAX_PWM_CMD 3800
@@ -75,6 +75,7 @@
   set_float(ch, PH_U); \
   set_float(ch, PH_V); \
   set_float(ch, PH_W); \
+  inverter.OCP_det = true; \
 }
 
 //macro sets commutation step to selected motor channel with given pwm and direction
@@ -168,6 +169,8 @@ public:
 
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
 
+    bool OCP_det = false;
+
 
 
 private:
@@ -185,6 +188,7 @@ private:
 
     uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
     uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
+
 
 
 

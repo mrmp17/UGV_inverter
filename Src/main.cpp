@@ -163,6 +163,7 @@ int main(void)
   inverter.enable_motor(CH2);
   inverter.enable_motor(CH3);
   inverter.enable_motor(CH4);
+  debug_print("motors active...\n");
 
 
 
@@ -185,23 +186,28 @@ int main(void)
 
     int16_t thrli = thr_left*1000;
     int16_t thrri = thr_right*1000;
-    //debug_print("left: %d, right: %d\n", thrli, thrri);
+    debug_print("left: %d, right: %d\n", thrli, thrri);
 
-//    inverter.set_motor_float(CH1, thr_left);
-//    inverter.set_motor_float(CH2, thr_left);
-//    inverter.set_motor_float(CH3, -thr_right);
-//    inverter.set_motor_float(CH4, -thr_right);
+    inverter.set_motor_float(CH1, thr_left);
+    inverter.set_motor_float(CH2, thr_left);
+    inverter.set_motor_float(CH3, -thr_right);
+    inverter.set_motor_float(CH4, -thr_right);
+
+    if(inverter.OCP_det){
+      //debug_print("OCP event!\n");
+      inverter.OCP_det = false;
+    }
 
 //    inverter.set_motor_float(CH1, 0.1);
 //    inverter.set_motor_float(CH2, 0.1);
 //    inverter.set_motor_float(CH3, -0.1);
 //    inverter.set_motor_float(CH4, -0.1);
 
-    uint32_t adcval = inverter.get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*(float)ADC_VBAT_COEF;
+    //uint32_t adcval = inverter.get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*(float)ADC_VBAT_COEF;
     //debug_print("bat adc voltage: %d\n", adcval);
 
-    uint32_t csval = inverter.get_ADC_voltage(ADC_CONV_2, ADC_CS1);
-    debug_print("cs1 adc voltage: %d\n", csval);
+    //uint32_t csval = inverter.get_ADC_voltage(ADC_CONV_2, ADC_CS1);
+    //debug_print("cs1 adc voltage: %d\n", csval);
 
 
 
