@@ -70,14 +70,6 @@
   HAL_GPIO_WritePin(enport_list[ch][phase], enpin_list[ch][phase], GPIO_PIN_SET); \
 }
 
-//current limit float channel command
-#define OCP_float(ch){ \
-  set_float(ch, PH_U); \
-  set_float(ch, PH_V); \
-  set_float(ch, PH_W); \
-  inverter.OCP_det = true; \
-}
-
 //macro sets commutation step to selected motor channel with given pwm and direction
 #define set_commutation_step(step, ch, dir, pwm_val) { \
   switch (phase_wvf_U[dir][step]){ \
@@ -134,20 +126,6 @@ extern "C" {
 
 
 
-//tim2: ch1
-//tim1: ch2
-//tim3: ch3
-//tim4: ch4
-
-//ch1: 2,3,1 (U;V;W)
-//ch2: 3,2,1
-//ch3: 3,2,1
-//ch4: 3,2,1
-
-//timer, timer_ch, en_port, en_pin arrays
-
-
-
 
 class Inverter {
 
@@ -158,7 +136,6 @@ public:
     bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
 
     void interrupt_handler(); //
-    void OCP_handler();
 
     bool set_motor_pwm(uint8_t channel, uint16_t pwm); // 0 to 3800
     void enable_motor(uint8_t channel);
@@ -169,8 +146,6 @@ public:
 
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
 
-    bool OCP_det = false;
-
 
 
 private:
@@ -179,11 +154,6 @@ private:
     uint16_t pwm_cmd_list [4] = {0};  //pwm commands for motor channels. call this with CHx defines
     bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
-
-
-    //raw max/min values for current limit.
-    const uint32_t current_limit_max_val = ADC_CURRENT_MIDVAL+(uint32_t)((float)MAX_CHANNEL_CURRENT*(float)ADC_CURRENT_LIMIT_COEF);
-    const uint32_t current_limit_min_val = ADC_CURRENT_MIDVAL-(uint32_t)((float)MAX_CHANNEL_CURRENT*(float)ADC_CURRENT_LIMIT_COEF);
 
 
     uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)

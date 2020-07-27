@@ -178,7 +178,6 @@ int main(void)
 
     float thr = input.skidSteer_throttle();
     float str = input.skidSteer_steer();
-    //todo: skid steer calcs
 
     float thr_left;
     float thr_right;
@@ -193,10 +192,6 @@ int main(void)
     inverter.set_motor_float(CH3, -thr_right);
     inverter.set_motor_float(CH4, -thr_right);
 
-    if(inverter.OCP_det){
-      //debug_print("OCP event!\n");
-      inverter.OCP_det = false;
-    }
 
 //    inverter.set_motor_float(CH1, 0.1);
 //    inverter.set_motor_float(CH2, 0.1);
