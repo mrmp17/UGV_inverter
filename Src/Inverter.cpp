@@ -81,9 +81,17 @@ bool Inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
 
 void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
+  static int16_t current;
+  static uint16_t pwm_lower;
   //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     if (enable_cmd_list[i]){ //if motor enabled
+      current = get_current(i);
+      if(current > MAX_CHANNEL_CURRENT){
+        pwm_lower = (uint16_t)((float)(current - MAX_CHANNEL_CURRENT) * CURRENT_LIMIT_KP);
+        if(pwm_lower > pwm_cmd_list[i]) pwm_cmd_list[i] = 0;
+        pwm_cmd_list[i] = pwm_cmd_list[i]- pwm_lower;
+      }
       read_hall(i, hall_pos); //read hall position
       set_commutation_step(hall_mapping[i][hall_pos], i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
     }
@@ -149,10 +157,13 @@ uint32_t Inverter::get_ADC_voltage(uint8_t adc, uint8_t channel) {
   else if (adc == ADC_CONV_2) return (ADC2_buffer[channel]*ADC_REF)/ADC_MAX_VAL; //mV
 }
 
+int16_t Inverter::get_current(uint8_t channel) {
+  return get_channel_current(channel);
+}
+
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
   if(AdcHandle == ADC2_HANDLE){
-    //inverter.OCP_handler();
   }
 }
 

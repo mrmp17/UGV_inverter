@@ -42,14 +42,15 @@
 #define ADC_CONV_2 1
 
 #define ADC_VBAT_COEF 15.33333333
-#define ADC_CURRENT_LIMIT_COEF 124.09090909 //adc_count per A
+#define ADC_CURRENT_COEF 8.0586086 //mA per adc count
 #define ADC_CURRENT_MIDVAL 2048 //todo: tune this value
+#define CURRENT_LIMIT_KP 0.006
 
-#define MAX_CHANNEL_CURRENT 2.0 //A
+#define MAX_CHANNEL_CURRENT 8000 //mA
 
 
 //#define MAX_PWM_CMD 3800
-#define MAX_PWM_CMD 1800 //safety
+#define MAX_PWM_CMD 3500 //safety
 #define MIN_PWM_CMD 0
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
@@ -116,7 +117,11 @@
   pos_byte |= uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][2], hallpin_list[ch][2])== GPIO_PIN_SET)<<2; \
 }
 
-//macro for reading channel currents
+
+#define get_channel_current(ch){ \
+  (int16_t)((float)((int16_t)inverter.ADC2_buffer[ch]-ADC_CURRENT_MIDVAL) *ADC_CURRENT_COEF) \
+}
+
 
 
 extern "C" {
@@ -145,6 +150,14 @@ public:
 
 
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
+    int16_t get_current (uint8_t channel);
+    uint16_t battery_voltage();
+
+
+    uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
+    uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
+
+    uint32_t maxval = 0;
 
 
 
@@ -156,8 +169,7 @@ private:
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
 
 
-    uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
-    uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
+
 
 
 

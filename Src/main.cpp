@@ -185,12 +185,15 @@ int main(void)
 
     int16_t thrli = thr_left*1000;
     int16_t thrri = thr_right*1000;
-    debug_print("left: %d, right: %d\n", thrli, thrri);
+    //debug_print("left: %d, right: %d\n", thrli, thrri);
+
+    debug_print("%d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
 
     inverter.set_motor_float(CH1, thr_left);
     inverter.set_motor_float(CH2, thr_left);
     inverter.set_motor_float(CH3, -thr_right);
     inverter.set_motor_float(CH4, -thr_right);
+
 
 
 //    inverter.set_motor_float(CH1, 0.1);
@@ -206,7 +209,7 @@ int main(void)
 
 
 
-    HAL_Delay(50);
+    HAL_Delay(20);
 
 
 
