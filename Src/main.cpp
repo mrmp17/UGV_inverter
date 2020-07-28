@@ -187,7 +187,10 @@ int main(void)
     int16_t thrri = thr_right*1000;
     //debug_print("left: %d, right: %d\n", thrli, thrri);
 
-    debug_print("%d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
+    //battery current output on serial
+    debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
+
+    //debug_print("encoder CH1: %d\n", inverter.encoder(CH1));
 
     inverter.set_motor_float(CH1, thr_left);
     inverter.set_motor_float(CH2, thr_left);

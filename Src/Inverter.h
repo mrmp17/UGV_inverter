@@ -41,7 +41,7 @@
 #define ADC_CONV_1 0
 #define ADC_CONV_2 1
 
-#define ADC_VBAT_COEF 15.33333333
+#define ADC_VBAT_COEF 15.33333333 //volts per adc voltage (divider ratio)
 #define ADC_CURRENT_COEF 8.0586086 //mA per adc count
 #define ADC_CURRENT_MIDVAL 2048 //todo: tune this value
 #define CURRENT_LIMIT_KP 0.006
@@ -124,14 +124,6 @@
 
 
 
-extern "C" {
-  void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle);
-}
-
-
-
-
-
 class Inverter {
 
 public:
@@ -140,7 +132,7 @@ public:
     void test(); //only for testing
     bool hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr);
 
-    void interrupt_handler(); //
+    void interrupt_handler(); //call this at 10kHz. Handles fast stuff
 
     bool set_motor_pwm(uint8_t channel, uint16_t pwm); // 0 to 3800
     void enable_motor(uint8_t channel);
@@ -152,13 +144,10 @@ public:
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
     int16_t get_current (uint8_t channel);
     uint16_t battery_voltage();
+    uint32_t encoder(uint8_t channel);
+    void reset_encoder(uint8_t channel);
 
-
-    uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
-    uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
-
-    uint32_t maxval = 0;
-
+    uint8_t test_compos;
 
 
 private:
@@ -167,6 +156,11 @@ private:
     uint16_t pwm_cmd_list [4] = {0};  //pwm commands for motor channels. call this with CHx defines
     bool dir_cmd_list [4] = {0};  //direction commands for motor channels. call this with CHx defines
     bool enable_cmd_list [4] = {0}; //motor enable command list. call this with CHx defines
+
+    uint32_t ADC1_buffer [2]; //adc1 buffer array (battery voltage and stm32 temperature)
+    uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
+
+    int32_t encoder_list [4] = {0}; //encoder array for 4 channels
 
 
 

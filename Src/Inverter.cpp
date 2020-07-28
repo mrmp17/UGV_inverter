@@ -81,29 +81,46 @@ bool Inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
 
 void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
+  static uint8_t commutation_step;
   static int16_t current;
   static uint16_t pwm_lower;
   //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     if (enable_cmd_list[i]){ //if motor enabled
+      //current limiting
       current = get_current(i);
       if(current > MAX_CHANNEL_CURRENT){
         pwm_lower = (uint16_t)((float)(current - MAX_CHANNEL_CURRENT) * CURRENT_LIMIT_KP);
         if(pwm_lower > pwm_cmd_list[i]) pwm_cmd_list[i] = 0;
         pwm_cmd_list[i] = pwm_cmd_list[i]- pwm_lower;
       }
+
+      //commutation
       read_hall(i, hall_pos); //read hall position
-      set_commutation_step(hall_mapping[i][hall_pos], i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
+      commutation_step = hall_mapping[i][hall_pos];
+      set_commutation_step(commutation_step, i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
     }
     else{ //set all phases to float if motor disabled
       set_float(i, PH_U);
       set_float(i, PH_U);
       set_float(i, PH_U);
     }
+
+    //encoder (runs even if motor is not enabled)
+    //commutation steps should be going in order, using this for step counting (commutation_step)
+    if(i==0){
+      test_compos = commutation_step;
+    }
+    static uint8_t prevStep [4] = {0};
+    if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]++;
+    else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]--;
+    prevStep[i] = commutation_step;
+
+
   }
+
   //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
   //todo: implement encoder counter
-  //todo: analog stuff
 }
 
 bool Inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with CHx defines
@@ -161,13 +178,17 @@ int16_t Inverter::get_current(uint8_t channel) {
   return get_channel_current(channel);
 }
 
-
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* AdcHandle){
-  if(AdcHandle == ADC2_HANDLE){
-  }
+uint16_t Inverter::battery_voltage() {
+    return (uint16_t)((float)get_ADC_voltage(ADC_CONV_1, ADC_VBAT)*ADC_VBAT_COEF);
 }
 
+uint32_t Inverter::encoder(uint8_t channel) {
+  return encoder_list[channel];
+}
 
+void Inverter::reset_encoder(uint8_t channel) {
+  encoder_list[channel] = 0;
+}
 
 
 
