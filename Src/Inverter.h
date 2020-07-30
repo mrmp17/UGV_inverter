@@ -47,9 +47,11 @@
 #define CURRENT_LIMIT_KP 0.006
 
 #define MOTOR_TICKS_PER_REV 90 //encoder ticks per revolution
+#define MOTOR_MAX_DTS_PER_TICK 2000 //rpm is 0 if no enocder change detected in 10000 ticks
+#define INTERRUPTS_PER_SEC 10000 //number of inverter handler interrupts per second
 #define MOTOR_CIRC 0.644 //motor circumfence in m todo: measure exactly
 
-#define MAX_CHANNEL_CURRENT 8000 //mA
+#define MAX_CHANNEL_CURRENT 10000 //mA
 
 #define MCU_TEMP_25_COEF 760 //mV at 25degc
 #define MCU_TEMP_SLOPE 2.5 //mV/degc
@@ -155,6 +157,9 @@ public:
 
     float MCU_temp();
 
+    int32_t motor_rpm(uint8_t channel);
+    float motor_vel(uint8_t channel); //motor velocity in m/s
+
 
 
 private:
@@ -169,9 +174,9 @@ private:
 
     int32_t encoder_list [4] = {0}; //encoder array for 4 channels
 
-    uint32_t velocity_dts_list[4] = {0}; //array for storing dt number between encoder changes (for calculating velocity)
+    uint32_t vel_dts_list[4] = {0}; //internal array for counting dts
+    int32_t vel_dts_per_tick[4] = {0}; //current motor velocity in dt/encoderTick
 
-    float velocity_list [4] = {0}; //velocity list for motors
 
 
 

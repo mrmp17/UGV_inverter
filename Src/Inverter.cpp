@@ -78,6 +78,14 @@ bool Inverter::hall_auto_map(uint8_t motor_ch, uint8_t *array_ptr) {
   }
 }
 
+int32_t Inverter::motor_rpm(uint8_t channel) {
+  return (60*INTERRUPTS_PER_SEC)/(MOTOR_TICKS_PER_REV*vel_dts_per_tick[channel]);
+}
+
+float Inverter::motor_vel(uint8_t channel) {
+  return (float)(motor_rpm(channel)*MOTOR_CIRC)/60;
+}
+
 
 void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
@@ -108,10 +116,28 @@ void Inverter::interrupt_handler() {
 
     //encoder (runs even if motor is not enabled)
     //commutation steps should be going in order, using this for step counting (commutation_step)
+    //also includes velocity calculations
     static uint8_t prevStep [4] = {0};
-    if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]++;
-    else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]--;
+    if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)){
+      encoder_list[i]++;
+      vel_dts_per_tick[i] = vel_dts_list[i];
+      vel_dts_list[i] = 0;
+    }
+    else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)){
+      encoder_list[i]--;
+      vel_dts_per_tick[i] = -vel_dts_list[i]; //negative dt/tick if going backwards
+      vel_dts_list[i] = 0;
+    }
+    if(vel_dts_list[i] > MOTOR_MAX_DTS_PER_TICK){
+      vel_dts_per_tick[i] = 0;
+      vel_dts_list[i] = 0;
+    }
+
     prevStep[i] = commutation_step;
+    vel_dts_list[i]++;
+
+
+
 
 
   }

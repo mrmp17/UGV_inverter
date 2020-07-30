@@ -187,8 +187,13 @@ int main(void)
     int16_t thrri = thr_right*1000;
     //debug_print("left: %d, right: %d\n", thrli, thrri);
 
+    //debug_print("RPM_1: %d\n", inverter.motor_rpm(CH1));
+    //debug_print("SPD_1: %d\n", (int32_t)(inverter.motor_vel(CH1)*10));
+
+    debug_print("batvolt: %d\n", inverter.battery_voltage());
+
     //battery current output on serial
-    debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
+    //debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
 
     //debug_print("encoder CH1: %d\n", inverter.encoder(CH1));
 
