@@ -86,6 +86,7 @@ void Inverter::interrupt_handler() {
   static uint16_t pwm_lower;
   //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
+    read_hall(i, hall_pos); //read hall position (even if disabled, to have encoder always working
     if (enable_cmd_list[i]){ //if motor enabled
       //current limiting
       current = get_current(i);
@@ -96,7 +97,6 @@ void Inverter::interrupt_handler() {
       }
 
       //commutation
-      read_hall(i, hall_pos); //read hall position
       commutation_step = hall_mapping[i][hall_pos];
       set_commutation_step(commutation_step, i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
     }
@@ -108,9 +108,6 @@ void Inverter::interrupt_handler() {
 
     //encoder (runs even if motor is not enabled)
     //commutation steps should be going in order, using this for step counting (commutation_step)
-    if(i==0){
-      test_compos = commutation_step;
-    }
     static uint8_t prevStep [4] = {0};
     if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]++;
     else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)) encoder_list[i]--;
@@ -190,6 +187,10 @@ void Inverter::reset_encoder(uint8_t channel) {
   encoder_list[channel] = 0;
 }
 
+
+float Inverter::MCU_temp() {
+  return ((float)(get_ADC_voltage(ADC_CONV_1, ADC_TEMP) - MCU_TEMP_25_COEF)/MCU_TEMP_SLOPE) + 25;
+}
 
 
 

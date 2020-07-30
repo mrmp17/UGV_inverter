@@ -46,7 +46,13 @@
 #define ADC_CURRENT_MIDVAL 2048 //todo: tune this value
 #define CURRENT_LIMIT_KP 0.006
 
+#define MOTOR_TICKS_PER_REV 90 //encoder ticks per revolution
+#define MOTOR_CIRC 0.644 //motor circumfence in m todo: measure exactly
+
 #define MAX_CHANNEL_CURRENT 8000 //mA
+
+#define MCU_TEMP_25_COEF 760 //mV at 25degc
+#define MCU_TEMP_SLOPE 2.5 //mV/degc
 
 
 //#define MAX_PWM_CMD 3800
@@ -147,7 +153,8 @@ public:
     uint32_t encoder(uint8_t channel);
     void reset_encoder(uint8_t channel);
 
-    uint8_t test_compos;
+    float MCU_temp();
+
 
 
 private:
@@ -161,6 +168,10 @@ private:
     uint32_t ADC2_buffer [4]; //adc2 buffer array (current sensing for 4 channels)
 
     int32_t encoder_list [4] = {0}; //encoder array for 4 channels
+
+    uint32_t velocity_dts_list[4] = {0}; //array for storing dt number between encoder changes (for calculating velocity)
+
+    float velocity_list [4] = {0}; //velocity list for motors
 
 
 
