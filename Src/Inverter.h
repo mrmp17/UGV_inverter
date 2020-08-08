@@ -47,9 +47,11 @@
 #define CURRENT_LIMIT_KP 0.006
 
 #define MOTOR_TICKS_PER_REV 90 //encoder ticks per revolution
-#define MOTOR_MAX_DTS_PER_TICK 2000 //rpm is 0 if no enocder change detected in 10000 ticks
+#define MOTOR_MAX_DTS_PER_TICK 1000 //rpm is 0 if no enocder change detected in 10000 ticks
 #define INTERRUPTS_PER_SEC 10000 //number of inverter handler interrupts per second
 #define MOTOR_CIRC 0.644 //motor circumfence in m todo: measure exactly
+
+#define MOTOR_DIR_CHG_THR 10 //at least 5 steps in one direction needed to detect as valid direction change
 
 #define MAX_CHANNEL_CURRENT 10000 //mA
 

@@ -92,7 +92,7 @@ void Inverter::interrupt_handler() {
   static uint8_t commutation_step;
   static int16_t current;
   static uint16_t pwm_lower;
-  //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     read_hall(i, hall_pos); //read hall position (even if disabled, to have encoder always working
     if (enable_cmd_list[i]){ //if motor enabled
@@ -118,19 +118,42 @@ void Inverter::interrupt_handler() {
     //commutation steps should be going in order, using this for step counting (commutation_step)
     //also includes velocity calculations
     static uint8_t prevStep [4] = {0};
-    if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)){
+    static bool prevDir [4] = {0}; //true: positive dir, false: negative dir
+    static uint32_t directionCount[4] = {0}; //this counts how many steps happened after direction change (capped at 10k to prevent ovrflw)
+
+    if((commutation_step > prevStep[i] || (commutation_step == 0 && prevStep[i] == 5)) && !(commutation_step == 5 && prevStep[i] == 0)){ //step in positive direction
       encoder_list[i]++;
-      vel_dts_per_tick[i] = vel_dts_list[i];
+      if(prevDir[i]){
+        if(directionCount[i] < 10000) directionCount[i]++;
+      }
+      else{
+        directionCount[i] = 0;
+      }
+      if(directionCount[i] >= MOTOR_DIR_CHG_THR){
+        vel_dts_per_tick[i] = vel_dts_list[i];
+      }
       vel_dts_list[i] = 0;
+      prevDir[i] = true;
     }
-    else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)){
+    else if(commutation_step < prevStep[i] || (commutation_step == 5 && prevStep[i] == 0)){ //step in negative direction
       encoder_list[i]--;
-      vel_dts_per_tick[i] = -vel_dts_list[i]; //negative dt/tick if going backwards
+      if(!prevDir[i]){
+        if(directionCount[i] < 10000) directionCount[i]++;
+      }
+      else{
+        directionCount[i] = 0;
+      }
+      if(directionCount[i] >= MOTOR_DIR_CHG_THR){
+        vel_dts_per_tick[i] = -vel_dts_list[i]; //negative dt/tick if going backwards
+      }
       vel_dts_list[i] = 0;
+      prevDir[i] = false;
     }
     if(vel_dts_list[i] > MOTOR_MAX_DTS_PER_TICK){
       vel_dts_per_tick[i] = 0;
-      vel_dts_list[i] = 0;
+    }
+    else{
+      vel_dts_list[i]++;
     }
 
     prevStep[i] = commutation_step;
@@ -142,7 +165,7 @@ void Inverter::interrupt_handler() {
 
   }
 
-  //HAL_GPIO_WritePin(GPIO1_TP_GPIO_Port, GPIO1_TP_Pin, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_RESET);
   //todo: implement encoder counter
 }
 

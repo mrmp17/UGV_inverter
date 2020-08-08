@@ -183,19 +183,58 @@ int main(void)
     float thr_right;
     diff_steer(thr, str, thr_left, thr_right);
 
-    int16_t thrli = thr_left*1000;
-    int16_t thrri = thr_right*1000;
+    //int16_t thrli = thr_left*1000;
+    //int16_t thrri = thr_right*1000;
     //debug_print("left: %d, right: %d\n", thrli, thrri);
 
     //debug_print("RPM_1: %d\n", inverter.motor_rpm(CH1));
     //debug_print("SPD_1: %d\n", (int32_t)(inverter.motor_vel(CH1)*10));
 
-    debug_print("batvolt: %d\n", inverter.battery_voltage());
+    //debug_print("batvolt: %d\n", inverter.battery_voltage());
+
+    //debug_print("mcu temp: %d\n", (int32_t)inverter.MCU_temp());
 
     //battery current output on serial
     //debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
 
-    //debug_print("encoder CH1: %d\n", inverter.encoder(CH1));
+    debug_print("rpm CH4: %d\n", inverter.motor_rpm(CH4));
+    //debug_print("enc CH4: %d\n", inverter.encoder(CH4));
+
+
+    //####### slip control
+
+    //CH1,CH3: front, CH2,CH4 back
+//    float slipCtrlKp = 0.001;
+//    float lf = thr_left;
+//    float lb = thr_left;
+//    float rf = thr_right;
+//    float rb = thr_right;
+//    int32_t dif_left = inverter.motor_rpm(CH1)-inverter.motor_rpm(CH2);
+//    int32_t dif_right = inverter.motor_rpm(CH3)-inverter.motor_rpm(CH4);
+//    if(abs(dif_left)>10){
+//      if(dif_left > 0){ //CH1 faster
+//        if(lf>0) lf  = thr_left - abs(dif_left)*slipCtrlKp;
+//        else lf  = thr_left + abs(dif_left)*slipCtrlKp;
+//
+//      }
+//      else{ //CH2 faster
+//        if(lb>0) lb = thr_left - abs(dif_left)*slipCtrlKp;
+//        else lb = thr_left + abs(dif_left)*slipCtrlKp;
+//
+//      }
+//    }
+//    if(abs(dif_right)>10){
+//      if(dif_right > 0){ //CH1 faster
+//        if(rf>0) rf  = thr_right - abs(dif_right)*slipCtrlKp;
+//        else rf  = thr_right + abs(dif_right)*slipCtrlKp;
+//
+//      }
+//      else{ //CH2 faster
+//        if(rb>0) rb = thr_right - abs(dif_right)*slipCtrlKp;
+//        else rb = thr_right + abs(dif_right)*slipCtrlKp;
+//
+//      }
+//    }
 
     inverter.set_motor_float(CH1, thr_left);
     inverter.set_motor_float(CH2, thr_left);
@@ -245,7 +284,6 @@ int main(void)
 //    uint16_t time = t2-t1;
 
 
-    //inverter.interrupt_handler();
 
 
 
