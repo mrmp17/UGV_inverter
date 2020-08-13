@@ -200,8 +200,6 @@ int main(void)
     //debug_print("rpm CH4: %d\n", inverter.motor_rpm(CH4));
     //debug_print("enc CH4: %d\n", inverter.encoder(CH4));
 
-    debug_print("cmd: %d, set: %d, diff: %d\n", inverter.pwm_commanded[0], inverter.pwm_set[0], inverter.diff[0]);
-
 //    uint8_t byteIn = serial_01.read();
 //    if(byteIn == 0x41){
 //      inverter.set_motor_float(CH1, 0.5);

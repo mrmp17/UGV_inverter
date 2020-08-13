@@ -96,13 +96,9 @@ void Inverter::interrupt_handler() {
   static uint8_t dt_counter [4] = {0,2,4,6}; //counts to PWM_RAMP_dt - dt takes a number of interrupt cycles. staged a few cycles (for shorter intterupr)
   static uint16_t actual_pwm [4] = {0};
   static bool actual_dir [4] = {0};
+  static uint8_t raw_hall_pos;
   //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
-    static uint8_t raw_hall_pos;
-    read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
-    if(raw_hall_pos > 1 && raw_hall_pos < 7 && 1){ //valid numbers only 1,2,3,4,5,6
-      hall_pos = raw_hall_pos;
-    }
     //else: if non valid hall position is read, hall_pos remains at the previous value
     //this avoids invalid position glitch between correct positions
     if (enable_cmd_list[i]){ //if motor enabled
@@ -119,13 +115,10 @@ void Inverter::interrupt_handler() {
 
         if(dir_cmd_list[i]) pwm_dir_combined = pwm_cmd_list[i];
         else pwm_dir_combined = -pwm_cmd_list[i];
-        pwm_commanded[i] = pwm_dir_combined; //TEST
-        diff[i] = abs(pwm_dir_combined - prev_pwm_dir_combined[i]); //TEST
         if(abs(pwm_dir_combined - prev_pwm_dir_combined[i]) <= MAX_dPWMdt){ //small, allowable change in pwm command
           actual_pwm[i] = pwm_cmd_list[i]; // no changes needed for pwm/dir commands
           actual_dir[i] = dir_cmd_list[i];
           prev_pwm_dir_combined[i] = pwm_dir_combined; //save as previous value to use in next dt cycle
-          pwm_set[i] = pwm_dir_combined; //TEST
         }
         else{ //pwm/dir change too big, reduction needed
 
@@ -145,7 +138,6 @@ void Inverter::interrupt_handler() {
             actual_dir[i] = false;
           }
           prev_pwm_dir_combined[i] = pwm_dir_comb_mod; //save as previous value to use in next dt cycle
-          pwm_set[i] = pwm_dir_comb_mod; //TEST
         }
         dt_counter[i] = 0;
       }
@@ -161,10 +153,18 @@ void Inverter::interrupt_handler() {
       }
 
       //commutation
+      read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
+      if(raw_hall_pos > 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
+        hall_pos = raw_hall_pos;
+      }
       commutation_step = hall_mapping[i][hall_pos];
       set_commutation_step(commutation_step, i, actual_dir[i], actual_pwm[i]); //set commutation according to hall position and commands
     }
     else{ //set all phases to float if motor disabled
+      read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
+      if(raw_hall_pos > 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
+        hall_pos = raw_hall_pos;
+      }
       set_float(i, PH_U);
       set_float(i, PH_U);
       set_float(i, PH_U);
@@ -222,7 +222,6 @@ void Inverter::interrupt_handler() {
   }
 
   //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_RESET);
-  //todo: implement encoder counter
 }
 
 bool Inverter::set_motor_pwm(uint8_t channel, uint16_t pwm) { //call this with CHx defines

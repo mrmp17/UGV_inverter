@@ -64,7 +64,8 @@
 #define MAX_PWM_CMD 3500 //safety
 #define MIN_PWM_CMD 0
 
-#define MAX_dPWMdt 2 //max change of 10 pwmVal per dt
+//todo: tune this to correct values
+#define MAX_dPWMdt 8 //max change of 10 pwmVal per dt
 #define PWM_RAMP_dt 10 // 1dt for ramping is 100 interupts: caution: this is uint8t in interruptHandler
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
@@ -166,11 +167,6 @@ public:
 
     int32_t motor_rpm(uint8_t channel);
     float motor_vel(uint8_t channel); //motor velocity in m/s
-
-    //only for testing
-    int16_t pwm_commanded[4];
-    int16_t pwm_set[4];
-    int32_t diff[4];
 
 
 
