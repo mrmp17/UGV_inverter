@@ -92,21 +92,77 @@ void Inverter::interrupt_handler() {
   static uint8_t commutation_step;
   static int16_t current;
   static uint16_t pwm_lower;
+  static int32_t prev_pwm_dir_combined [4] = {0}; //previous pwm/dir command. This is before current limit!
+  static uint8_t dt_counter [4] = {0,2,4,6}; //counts to PWM_RAMP_dt - dt takes a number of interrupt cycles. staged a few cycles (for shorter intterupr)
+  static uint16_t actual_pwm [4] = {0};
+  static bool actual_dir [4] = {0};
   //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
-    read_hall(i, hall_pos); //read hall position (even if disabled, to have encoder always working
+    static uint8_t raw_hall_pos;
+    read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
+    if(raw_hall_pos > 1 && raw_hall_pos < 7 && 1){ //valid numbers only 1,2,3,4,5,6
+      hall_pos = raw_hall_pos;
+    }
+    //else: if non valid hall position is read, hall_pos remains at the previous value
+    //this avoids invalid position glitch between correct positions
     if (enable_cmd_list[i]){ //if motor enabled
+
+      //pwm change ramping: limits dPWM/dt to protect the motor from current spikes.
+      //this happens BEFORE current limiting. Current limit must be immediate, not ramped!!
+      //monitors direction change too - prevents direction change at high pwms
+      if(dt_counter[i] < PWM_RAMP_dt){
+        dt_counter[i]++; //increment dt counter if not yet at threshold
+      }
+      else{ //this is a dt event! pwm and direction is checked and modified here
+        static int32_t pwm_dir_combined; //combined pwm and direction in a single signed variable
+        static int32_t pwm_dir_comb_mod; //modified pwm/dir combined (max allowable change)
+
+        if(dir_cmd_list[i]) pwm_dir_combined = pwm_cmd_list[i];
+        else pwm_dir_combined = -pwm_cmd_list[i];
+        pwm_commanded[i] = pwm_dir_combined; //TEST
+        diff[i] = abs(pwm_dir_combined - prev_pwm_dir_combined[i]); //TEST
+        if(abs(pwm_dir_combined - prev_pwm_dir_combined[i]) <= MAX_dPWMdt){ //small, allowable change in pwm command
+          actual_pwm[i] = pwm_cmd_list[i]; // no changes needed for pwm/dir commands
+          actual_dir[i] = dir_cmd_list[i];
+          prev_pwm_dir_combined[i] = pwm_dir_combined; //save as previous value to use in next dt cycle
+          pwm_set[i] = pwm_dir_combined; //TEST
+        }
+        else{ //pwm/dir change too big, reduction needed
+
+          if(pwm_dir_combined > prev_pwm_dir_combined[i]){
+            pwm_dir_comb_mod = prev_pwm_dir_combined[i]+MAX_dPWMdt;
+          }
+          else{
+            pwm_dir_comb_mod = prev_pwm_dir_combined[i]-MAX_dPWMdt;
+          }
+          //convert combined value back into pwm and dir
+          if(pwm_dir_comb_mod >= 0){
+            actual_pwm[i] = pwm_dir_comb_mod;
+            actual_dir[i] = true;
+          }
+          else{
+            actual_pwm[i] = -pwm_dir_comb_mod;
+            actual_dir[i] = false;
+          }
+          prev_pwm_dir_combined[i] = pwm_dir_comb_mod; //save as previous value to use in next dt cycle
+          pwm_set[i] = pwm_dir_comb_mod; //TEST
+        }
+        dt_counter[i] = 0;
+      }
+
+
+
       //current limiting
       current = get_current(i);
       if(current > MAX_CHANNEL_CURRENT){
         pwm_lower = (uint16_t)((float)(current - MAX_CHANNEL_CURRENT) * CURRENT_LIMIT_KP);
-        if(pwm_lower > pwm_cmd_list[i]) pwm_cmd_list[i] = 0;
-        pwm_cmd_list[i] = pwm_cmd_list[i]- pwm_lower;
+        if(pwm_lower > actual_pwm[i]) actual_pwm[i] = 0;
+        actual_pwm[i] = actual_pwm[i]- pwm_lower;
       }
 
       //commutation
       commutation_step = hall_mapping[i][hall_pos];
-      set_commutation_step(commutation_step, i, dir_cmd_list[i], pwm_cmd_list[i]); //set commutation according to hall position and commands
+      set_commutation_step(commutation_step, i, actual_dir[i], actual_pwm[i]); //set commutation according to hall position and commands
     }
     else{ //set all phases to float if motor disabled
       set_float(i, PH_U);

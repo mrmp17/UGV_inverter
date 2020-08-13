@@ -10,6 +10,7 @@
 #include "gpio.h"
 #include "stm32f4xx_hal_gpio.h"
 #include "adc.h"
+#include <math.h>
 
 //use these defines with macros, to define BLDC channel
 #define CH1 0
@@ -62,6 +63,9 @@
 //#define MAX_PWM_CMD 3800
 #define MAX_PWM_CMD 3500 //safety
 #define MIN_PWM_CMD 0
+
+#define MAX_dPWMdt 2 //max change of 10 pwmVal per dt
+#define PWM_RAMP_dt 10 // 1dt for ramping is 100 interupts: caution: this is uint8t in interruptHandler
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
 #define set_float(ch, phase) { \
@@ -120,6 +124,7 @@
 
 //this macro reads hall signals for specified channel and calculates a position number (which needs to be mapped to commutation waveform step
 //values "0" and "7" are non-valid!! todo: implement validity check somewhere
+//implemented in interrupt_handler!
 #define read_hall(ch, pos_byte){ \
   pos_byte = 0u; \
   pos_byte = uint8_t(HAL_GPIO_ReadPin(hallport_list[ch][0], hallpin_list[ch][0])== GPIO_PIN_SET); \
@@ -161,6 +166,11 @@ public:
 
     int32_t motor_rpm(uint8_t channel);
     float motor_vel(uint8_t channel); //motor velocity in m/s
+
+    //only for testing
+    int16_t pwm_commanded[4];
+    int16_t pwm_set[4];
+    int32_t diff[4];
 
 
 
@@ -222,7 +232,7 @@ private:
     uint8_t phase_wvf_W [2][6] = {{WVF_FLT, WVF_LOW, WVF_LOW, WVF_FLT, WVF_PWM, WVF_PWM},{WVF_FLT, WVF_PWM, WVF_PWM, WVF_FLT, WVF_LOW, WVF_LOW}}; //defines commutation waveform. contains 6 commutation steps for forward/reverse direction (phase W)
 
 
-    //hall mapping for every channel. index: hall position  value at index: corresponding commutation step
+    //hall mapping for every channel. index: hall position  ,value at index: corresponding commutation step
     uint8_t hall_mapping [4][7] = {{0,1,3,2,5,0,4},
                                    {0,1,3,2,5,0,4},
                                    {0,1,3,2,5,0,4},
