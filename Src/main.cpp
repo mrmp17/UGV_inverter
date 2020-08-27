@@ -262,7 +262,7 @@ int main(void)
     //uint32_t csval = inverter.get_ADC_voltage(ADC_CONV_2, ADC_CS1);
     //debug_print("cs1 adc voltage: %d\n", csval);
 
-
+    //debug_print("%d\n", inverter.get_current(CH3));
 
     HAL_Delay(20);
 

@@ -89,6 +89,7 @@ float Inverter::motor_vel(uint8_t channel) {
 
 void Inverter::interrupt_handler() {
   static uint8_t hall_pos;
+  static uint8_t raw_hall_pos;
   static uint8_t commutation_step;
   static int16_t current;
   static uint16_t pwm_lower;
@@ -96,7 +97,6 @@ void Inverter::interrupt_handler() {
   static uint8_t dt_counter [4] = {0,2,4,6}; //counts to PWM_RAMP_dt - dt takes a number of interrupt cycles. staged a few cycles (for shorter intterupr)
   static uint16_t actual_pwm [4] = {0};
   static bool actual_dir [4] = {0};
-  static uint8_t raw_hall_pos;
   //HAL_GPIO_WritePin(GPIO_OUT_1_GPIO_Port, GPIO_OUT_1_Pin, GPIO_PIN_SET);
   for (uint8_t i = CH1; i <= CH4; ++i) {  //do the same for all motor channels
     //else: if non valid hall position is read, hall_pos remains at the previous value
@@ -134,7 +134,7 @@ void Inverter::interrupt_handler() {
             actual_dir[i] = true;
           }
           else{
-            actual_pwm[i] = -pwm_dir_comb_mod;
+            actual_pwm[i] = -pwm_dir_comb_mod; //change back to positive value
             actual_dir[i] = false;
           }
           prev_pwm_dir_combined[i] = pwm_dir_comb_mod; //save as previous value to use in next dt cycle
@@ -154,7 +154,7 @@ void Inverter::interrupt_handler() {
 
       //commutation
       read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
-      if(raw_hall_pos > 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
+      if(raw_hall_pos >= 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
         hall_pos = raw_hall_pos;
       }
       commutation_step = hall_mapping[i][hall_pos];
@@ -162,7 +162,7 @@ void Inverter::interrupt_handler() {
     }
     else{ //set all phases to float if motor disabled
       read_hall(i, raw_hall_pos); //read hall position (even if disabled, to have encoder always working
-      if(raw_hall_pos > 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
+      if(raw_hall_pos >= 1 && raw_hall_pos < 7){ //valid numbers only 1,2,3,4,5,6
         hall_pos = raw_hall_pos;
       }
       set_float(i, PH_U);

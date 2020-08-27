@@ -52,7 +52,7 @@
 #define INTERRUPTS_PER_SEC 10000 //number of inverter handler interrupts per second
 #define MOTOR_CIRC 0.644 //motor circumfence in m todo: measure exactly
 
-#define MOTOR_DIR_CHG_THR 10 //at least 5 steps in one direction needed to detect as valid direction change
+#define MOTOR_DIR_CHG_THR 10 //at least 10 steps in one direction needed to detect as valid direction change
 
 #define MAX_CHANNEL_CURRENT 10000 //mA
 
@@ -64,8 +64,8 @@
 #define MAX_PWM_CMD 3500 //safety
 #define MIN_PWM_CMD 0
 
-//todo: tune this to correct values
-#define MAX_dPWMdt 8 //max change of 10 pwmVal per dt
+//todo: tune this to correct values (now semi tuned)
+#define MAX_dPWMdt 30 //max change of 10 pwmVal per dt
 #define PWM_RAMP_dt 10 // 1dt for ramping is 100 interupts: caution: this is uint8t in interruptHandler
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
