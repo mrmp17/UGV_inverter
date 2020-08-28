@@ -34,7 +34,13 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
+
 #include "input_PWM.h"
+
+#include "simple_serial_arduino/src/SimpleSerial.h"
+#include "simple_serial_arduino/src/transmission_test.h"
+
 
 /* USER CODE END Includes */
 
@@ -55,6 +61,20 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+SimpleSerial sser(&serial_01, 60, 8);
+enum class SS_ID : uint8_t {
+    STATUS = 10,
+    MOTOR_PWR = 20,
+    MOVE = 22,
+    MOVE_TANK = 23
+};
+uint32_t status_send_interval = 100; // ms
+uint32_t last_status_send = 0;
+uint32_t move_rec_interval = 1000; // ms
+uint32_t last_move_rec = 0;
+
+enum class ControlMode : uint8_t {rc, serial};
+ControlMode control_mode = ControlMode::serial;
 
 
 /* USER CODE END PV */
@@ -68,7 +88,7 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 void debug_print(const char *format, ...){
-  //return;
+  return;
   char formatedString[128] = {0};
   va_list arglist;
   va_start(arglist, format);
@@ -106,6 +126,22 @@ void diff_steer(float trans, float rot, float &left, float &right) {
   right = scale * (trans + rot);
 }
 
+void move(float trans, float rot) {
+    float left;
+    float right;
+    diff_steer(trans, rot, left, right);
+    inverter.set_motor_float(CH1, left);
+    inverter.set_motor_float(CH2, left);
+    inverter.set_motor_float(CH3, -right);
+    inverter.set_motor_float(CH4, -right);
+}
+
+void move_tank(float left, float right) {
+    inverter.set_motor_float(CH1, left);
+    inverter.set_motor_float(CH2, left);
+    inverter.set_motor_float(CH3, -right);
+    inverter.set_motor_float(CH4, -right);
+}
 
 /* USER CODE END 0 */
 
@@ -165,9 +201,7 @@ int main(void)
   inverter.enable_motor(CH4);
   debug_print("motors active...\n");
 
-
-
-
+  debug_print("TEST BEGIN\n");
 
   /* USER CODE END 2 */
 
@@ -175,35 +209,33 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 
+    if (control_mode == ControlMode::rc) {
+        float thr = input.skidSteer_throttle();
+        float str = input.skidSteer_steer();
+        move(thr, str);
+    }
 
-    float thr = input.skidSteer_throttle();
-    float str = input.skidSteer_steer();
-
-    float thr_left;
-    float thr_right;
-    diff_steer(thr, str, thr_left, thr_right);
-
-    //int16_t thrli = thr_left*1000;
-    //int16_t thrri = thr_right*1000;
-    //debug_print("left: %d, right: %d\n", thrli, thrri);
-
-    //debug_print("RPM_1: %d\n", inverter.motor_rpm(CH1));
-    //debug_print("SPD_1: %d\n", (int32_t)(inverter.motor_vel(CH1)*10));
-
-    //debug_print("batvolt: %d\n", inverter.battery_voltage());
-
-    //debug_print("mcu temp: %d\n", (int32_t)inverter.MCU_temp());
-
-    //battery current output on serial
-    //debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
-
-    debug_print("rpm CH4: %d\n", inverter.motor_rpm(CH4));
-    //debug_print("enc CH4: %d\n", inverter.encoder(CH4));
-
-
-    //####### slip control
-
-    //CH1,CH3: front, CH2,CH4 back
+//    int16_t thrli = thr_left*1000;
+//    int16_t thrri = thr_right*1000;
+//    debug_print("left: %d, right: %d\n", thrli, thrri);
+//
+//    debug_print("RPM_1: %d\n", inverter.motor_rpm(CH1));
+//    debug_print("SPD_1: %d\n", (int32_t)(inverter.motor_vel(CH1)*10));
+//
+//    debug_print("batvolt: %d\n", inverter.battery_voltage());
+//
+//    debug_print("mcu temp: %d\n", (int32_t)inverter.MCU_temp());
+//
+//    battery current output on serial
+//    debug_print("batt cur: %d\n", inverter.get_current(CH1)+inverter.get_current(CH2)+inverter.get_current(CH3)+inverter.get_current(CH4));
+//
+//    debug_print("rpm CH4: %d\n", inverter.motor_rpm(CH4));
+//    debug_print("enc CH4: %d\n", inverter.encoder(CH4));
+//
+//
+//    ####### slip control
+//
+//    CH1,CH3: front, CH2,CH4 back
 //    float slipCtrlKp = 0.001;
 //    float lf = thr_left;
 //    float lb = thr_left;
@@ -235,14 +267,9 @@ int main(void)
 //
 //      }
 //    }
-
-    inverter.set_motor_float(CH1, thr_left);
-    inverter.set_motor_float(CH2, thr_left);
-    inverter.set_motor_float(CH3, -thr_right);
-    inverter.set_motor_float(CH4, -thr_right);
-
-
-
+//
+//
+//
 //    inverter.set_motor_float(CH1, 0.1);
 //    inverter.set_motor_float(CH2, 0.1);
 //    inverter.set_motor_float(CH3, -0.1);
@@ -256,7 +283,7 @@ int main(void)
 
 
 
-    HAL_Delay(20);
+//    HAL_Delay(20);
 
 
 
@@ -292,6 +319,89 @@ int main(void)
 //    Inverter.hall_auto_map(CH2, result);
 //    debug_print("commutation array: [%d,%d,%d,%d,%d,%d,%d]\n", result[0],result[1],result[2],result[3],result[4],result[5],result[6]);
 //    HAL_Delay(5000);
+
+
+    // Simple serial command loop
+    sser.loop();
+    if (sser.available()) {
+        SimpleSerial::Packet packet = sser.read();
+        switch (static_cast<SS_ID >(packet.id)) {
+            case SS_ID::MOTOR_PWR: {
+                int16_t pwr = byte_conversion::bytes_2_int(packet.payload);
+                if (pwr > 0) {
+                    inverter.enable_motor(CH1);
+                    inverter.enable_motor(CH2);
+                    inverter.enable_motor(CH3);
+                    inverter.enable_motor(CH4);
+                }
+                else {
+                    inverter.disable_motor(CH1);
+                    inverter.disable_motor(CH2);
+                    inverter.disable_motor(CH3);
+                    inverter.disable_motor(CH4);
+                }}
+                break;
+            case SS_ID::MOVE: {
+                float trans = byte_conversion::bytes_2_float(packet.payload);
+                float rot = byte_conversion::bytes_2_float(packet.payload + 4);
+                if (control_mode == ControlMode::serial) {
+                    last_move_rec = HAL_GetTick();
+                    move(trans, rot);
+                }}
+                break;
+            case SS_ID::MOVE_TANK: {
+                float left = byte_conversion::bytes_2_float(packet.payload);
+                float right = byte_conversion::bytes_2_float(packet.payload + 4);
+                if (control_mode == ControlMode::serial) {
+                    last_move_rec = HAL_GetTick();
+                    move_tank(left, right);
+                }}
+                break;
+            default:
+                break;
+        }
+    }
+
+    // Check last received move time
+    if (HAL_GetTick() - last_move_rec > move_rec_interval) {
+        move(0, 0);
+    }
+
+    // Send status
+    if (HAL_GetTick() - last_status_send > status_send_interval) {
+        uint8_t payload[36];
+        uint8_t bts[4];
+
+        byte_conversion::float_2_bytes(inverter.motor_vel(CH1), bts);
+        memcpy(payload, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.motor_vel(CH2), bts);
+        memcpy(payload+4, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.motor_vel(CH3), bts);
+        memcpy(payload+8, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.motor_vel(CH4), bts);
+        memcpy(payload+12, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.get_current(CH1), bts);
+        memcpy(payload+16, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.get_current(CH2), bts);
+        memcpy(payload+20, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.get_current(CH3), bts);
+        memcpy(payload+24, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.get_current(CH4), bts);
+        memcpy(payload+28, bts, 4);
+
+        byte_conversion::float_2_bytes(inverter.battery_voltage(), bts);
+        memcpy(payload+32, bts, 4);
+
+//        sser.send(static_cast<uint8_t>(SS_ID::STATUS), 36, payload);
+        last_status_send = HAL_GetTick();
+    }
 
 
     /* USER CODE END WHILE */

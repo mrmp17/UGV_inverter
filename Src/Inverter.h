@@ -60,7 +60,7 @@
 
 
 //#define MAX_PWM_CMD 3800
-#define MAX_PWM_CMD 3500 //safety
+#define MAX_PWM_CMD 1000 //safety
 #define MIN_PWM_CMD 0
 
 //set enable pin to low and pwm to 0 (low) (floats phase)
