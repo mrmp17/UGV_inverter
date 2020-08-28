@@ -201,7 +201,9 @@ int main(void)
   inverter.enable_motor(CH4);
   debug_print("motors active...\n");
 
-  debug_print("TEST BEGIN\n");
+
+
+
 
   /* USER CODE END 2 */
 
