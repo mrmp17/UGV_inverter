@@ -61,14 +61,14 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-SimpleSerial sser(&serial_01, 60, 8);
+SimpleSerial sser(&serial_01, 40, 8);
 enum class SS_ID : uint8_t {
     STATUS = 10,
     MOTOR_PWR = 20,
     MOVE = 22,
     MOVE_TANK = 23
 };
-uint32_t status_send_interval = 100; // ms
+uint32_t status_send_interval = 500; // ms
 uint32_t last_status_send = 0;
 uint32_t move_rec_interval = 1000; // ms
 uint32_t last_move_rec = 0;
@@ -200,10 +200,6 @@ int main(void)
   inverter.enable_motor(CH3);
   inverter.enable_motor(CH4);
   debug_print("motors active...\n");
-
-
-
-
 
   /* USER CODE END 2 */
 
@@ -401,7 +397,7 @@ int main(void)
         byte_conversion::float_2_bytes(inverter.battery_voltage(), bts);
         memcpy(payload+32, bts, 4);
 
-//        sser.send(static_cast<uint8_t>(SS_ID::STATUS), 36, payload);
+        sser.send(static_cast<uint8_t>(SS_ID::STATUS), 36, payload);
         last_status_send = HAL_GetTick();
     }
 
