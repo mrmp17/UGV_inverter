@@ -265,6 +265,23 @@ void Inverter::set_motor_direction(uint8_t channel, bool dir) {
   dir_cmd_list[channel] = dir;
 }
 
+void Inverter::enable_motors() {
+    inverter.enable_motor(CH1);
+    inverter.enable_motor(CH2);
+    inverter.enable_motor(CH3);
+    inverter.enable_motor(CH4);
+    motors_enabled_ = true;
+}
+
+void Inverter::disable_motors() {
+    inverter.disable_motor(CH1);
+    inverter.disable_motor(CH2);
+    inverter.disable_motor(CH3);
+    inverter.disable_motor(CH4);
+    motors_enabled_ = false;
+}
+
+
 
 float Inverter::mapf(float x, float in_min, float in_max, float out_min, float out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;

@@ -327,16 +327,10 @@ int main(void)
             case SS_ID::MOTOR_PWR: {
                 int16_t pwr = byte_conversion::bytes_2_int(packet.payload);
                 if (pwr > 0) {
-                    inverter.enable_motor(CH1);
-                    inverter.enable_motor(CH2);
-                    inverter.enable_motor(CH3);
-                    inverter.enable_motor(CH4);
+                    inverter.enable_motors();
                 }
                 else {
-                    inverter.disable_motor(CH1);
-                    inverter.disable_motor(CH2);
-                    inverter.disable_motor(CH3);
-                    inverter.disable_motor(CH4);
+                    inverter.disable_motors();
                 }}
                 break;
             case SS_ID::MOVE: {
@@ -367,7 +361,7 @@ int main(void)
 
     // Send status
     if (HAL_GetTick() - last_status_send > status_send_interval) {
-        uint8_t payload[36];
+        uint8_t payload[37];
         uint8_t bts[4];
 
         byte_conversion::float_2_bytes(inverter.motor_vel(CH1), bts);
@@ -397,7 +391,9 @@ int main(void)
         byte_conversion::float_2_bytes(inverter.battery_voltage(), bts);
         memcpy(payload+32, bts, 4);
 
-        sser.send(static_cast<uint8_t>(SS_ID::STATUS), 36, payload);
+        payload[36] = static_cast<uint8_t>(inverter.motors_enabled());
+
+        sser.send(static_cast<uint8_t>(SS_ID::STATUS), 37, payload);
         last_status_send = HAL_GetTick();
     }
 

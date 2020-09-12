@@ -156,6 +156,9 @@ public:
     void set_motor_float (uint8_t channel, float throttle); // -1 to 1
     void set_motor_direction (uint8_t channel, bool dir);
 
+    void enable_motors();
+    void disable_motors();
+    bool motors_enabled() { return motors_enabled_; };
 
     uint32_t get_ADC_voltage (uint8_t adc, uint8_t channel);
     int16_t get_current (uint8_t channel);
@@ -185,7 +188,7 @@ private:
     uint32_t vel_dts_list[4] = {0}; //internal array for counting dts
     int32_t vel_dts_per_tick[4] = {0}; //current motor velocity in dt/encoderTick
 
-
+    bool motors_enabled_ = false;
 
 
 
